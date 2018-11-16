@@ -259,6 +259,7 @@ class Main():
 
                 if self.debug:
                     self.log("Generovany rozsah mapovych ctvercu je {:d}:{:d} - {:d}:{:d}!".format(stredovyTileX - pocetTiluDoleva, stredovyTileY - pocetTiluNahoru, stredovyTileX + pocetTiluDoprava, stredovyTileY + pocetTiluDolu))
+                    self.log("Střed se nachází {:f}px zleva a {:f}px shora!".format(pxlOdLevehoKraje, pxlOdShora))
                     self.log("Výsledný obrázek bude ořezán o {:d}px zleva a {:d}px shora!".format(cropLeva, cropShora))
 
                 stazeneCtverce = []
@@ -437,6 +438,52 @@ class Window():
 
     def turnOnTurnOffTriggered(self):
         M.replaceGoogleImg = not M.replaceGoogleImg
+        appdata_path = os.environ["LOCALAPPDATA"]
+        M.log("Mažu TS cache mapových podkladů!")
+        #win8 + 10
+        try:
+            deleted = False
+            exception = False
+            for folder in os.listdir(os.path.join(appdata_path, "Microsoft", "Windows", "INetCache", "IE")):
+                folder_path = os.path.join(appdata_path, "Microsoft", "Windows", "INetCache", "IE", folder)
+                if os.path.isdir(folder_path):
+                    for file in os.listdir(folder_path):
+                        if file.find("staticmap") != -1:
+                            try:
+                                os.unlink(os.path.join(folder_path, file))
+                                deleted = True
+                            except:
+                                exception = True
+            if exception:
+                M.log("Nepovedlo se vyčistit některé cacheované tily, nové tily se nemusí správně zobrazit!")
+                messagebox.showwarning("Neznámá chyba!", "Nepovedlo se vyčistit některé cacheované tily, nové tily se nemusí správně zobrazit!")
+            elif not deleted:
+                M.log("Nebyly nalezeny žádné soubory TS cache! Nothing to do!")
+        except:
+            M.log("Neznámá chyba! Možná systém není Windows 8/10?")
+        
+        #win7 + XP
+        try:
+            deleted = False
+            exception = False
+            for folder in os.listdir(os.path.join(appdata_path, "Microsoft", "Windows", "Temporary Internet Files", "Content.IE5")):
+                folder_path = os.path.join(appdata_path, "Microsoft", "Windows", "Temporary Internet Files", "Content.IE5", folder)
+                if os.path.isdir(folder_path):
+                    for file in os.listdir(folder_path):
+                        if file.find("staticmap") != -1:
+                            try:
+                                os.unlink(os.path.join(folder_path, file))
+                                deleted = True
+                            except:
+                                exception = True
+            if exception:
+                M.log("Nepovedlo se vyčistit některé cacheované tily, nové tily se nemusí správně zobrazit!")
+                messagebox.showwarning("Neznámá chyba!", "Nepovedlo se vyčistit některé cacheované tily, nové tily se nemusí správně zobrazit!")
+            elif not deleted:
+                M.log("Nebyly nalezeny žádné soubory TS cache! Nothing to do!")
+        except:
+            M.log("Neznámá chyba! Možná systém není Windows XP/Vista/7?")
+
         if M.replaceGoogleImg:
             self.button_text.set("VYPNI MAPY.CZ")
         else:
