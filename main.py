@@ -7,7 +7,7 @@ import requests
 import urllib, urllib.request
 import math
 import sys
-import socket
+import socket, errno
 import ctypes
 import configparser
 from tkinter import *
@@ -113,6 +113,25 @@ class Main():
             return(hosts_array)
         except:
             return {}
+
+    #check if http port 80 is free
+    def checkIfHTTPisFree(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.bind(("127.0.0.1", 80))
+        except socket.error as e:
+            if e.errno == errno.EADDRINUSE:
+                self.log("Kritická chyba! Port 80 je již otevřený jinou aplikací! Nelze pokračovat!")
+                messagebox.showerror("Kritická chyba!","Port 80 je již otevřený jinou aplikací! Nelze pokračovat!")
+            elif e.errno in (errno.EACCES, getattr(errno, 'WSAEACCES', errno.EACCES)):
+                self.log("Kritická chyba! Systém zakázal přístup k portu 80! Nelze pokračovat!")
+                messagebox.showerror("Kritická chyba!","Systém zakázal přístup k portu 80!\nBuď je používaný jinou aplikací, nebo přístup blokuje antivirový program!\nNelze pokračovat!")
+            else:
+                pass
+                #possible handling other errors with sockets
+            return(False)
+        s.close()
+        return(True)
 
     #funkce na zalohovani souboru hosts
     def zalohujANastavVlastniHosts(self):
@@ -356,6 +375,9 @@ class Main():
                 messagebox.showerror("Kritická chyba!","Ve složce etc chybí soubor hosts! Nejde pokračovat!")
                 return(False)
 
+            if not self.checkIfHTTPisFree():
+                return(False)
+
             self.serverClass = HTTP_handler()
 
             self.log("Nastavuji on close callback!")
@@ -420,10 +442,37 @@ class Window():
         else:
             self.button_text.set("ZAPNI MAPY.CZ")
 
+    def deleteCache(self):
+        M.log("Mažu cache!")
+        try:
+            for the_file in os.listdir("output_cache"):
+                file_path = os.path.join("output_cache", the_file)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                except Exception as e:
+                    M.log(e)
+        except:
+            M.log("Složka output_cache neexistuje. Nothing to do!")
+        
+        try:
+            for the_file in os.listdir("mapy_cz_cache"):
+                file_path = os.path.join("mapy_cz_cache", the_file)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                except Exception as e:
+                    M.log(e)
+        except:
+            M.log("Složka mapy_cz_cache neexistuje. Nothing to do!")
+
+        messagebox.showinfo("Hotovo", "Cache úspěšně vymazaná!")
+        M.log("Cache fuč!")
+
     def appWindowCreator(self):
         M.log("Sestavuji GUI rozhraní aplikace!")
         root.option_add('*tearOff', FALSE)
-        root.title("MapyCZforTS v.0.2.0.2")
+        root.title("MapyCZforTS v.0.3.0.2")
         root.minsize(256,256)
 
         root.columnconfigure(0, weight=1)
@@ -461,6 +510,7 @@ class Window():
 
         self.mainMenu.add_cascade(menu=self.mainMenuSoubor, label="Soubor")
         self.mainMenu.add_cascade(menu=self.mainMenuNastaveni, label="Nastavení")
+        self.mainMenu.add_command(label="Vymaž cache", command=self.deleteCache)
 
         root["menu"] = self.mainMenu
 
