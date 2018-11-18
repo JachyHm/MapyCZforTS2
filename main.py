@@ -17,6 +17,7 @@ from tkinter import ttk
 from threading import Thread
 from PIL import Image
 import tempfile
+from collections import OrderedDict
 import ico
 
 ICON = ico.ikona
@@ -29,6 +30,12 @@ root = Tk()
 root.iconbitmap(default=ICON_PATH)
 root.withdraw()
 
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
 class Main():
     def __init__(self):
         #init promennych
@@ -40,32 +47,187 @@ class Main():
         self.hostsEditedOK = False
         self.appAlreadyEnded = False
         self.wasMapsGoogleInHosts = False
+        self.mapsets = OrderedDict()
+        self.currentMapset = ""
 
         #ziskej puvodni GAPI IP
         self.originalGoogleAPIip = socket.gethostbyname('maps.googleapis.com')
 
         #precti data z konfigu
-        configFile = configparser.RawConfigParser()
+        configFile = configparser.RawConfigParser(delimiters=("="))
+        configFile.optionxform = str
         try:
             configFile.read(os.path.abspath("MapyCZforTS_settings.ini"))
             self.working_directory_path = configFile['Settings']['working_directory_path']
             self.logfile_path = os.path.join(self.working_directory_path,"MapyCZforTS.log")
             if configFile['Settings']['debug'] == "true" or configFile['Settings']['debug'] == "True":
                 self.debug = True
+            try:
+                configFile['Mapsets']
+            except:
+                self.log("Konfigurační soubor neobsahoval sekci Mapsets! Generuju základní verzi!")
+                root.lift()
+                root.attributes('-topmost', True)
+                messagebox.showwarning("Chyba!","Konfigurační soubor neobsahoval sekci Mapsets!\nGeneruju základní verzi!")
+                root.attributes('-topmost', False)
+                configFile_mapsetUpdate = configparser.RawConfigParser(delimiters=("="))
+                configFile_mapsetUpdate.optionxform = str
+                configFile_mapsetUpdate.read_dict(OrderedDict([
+                    ("Mapsets",OrderedDict([
+                        ("current","ophoto-m"),
+                        ("Základní","base-m:18"),
+                        ("Letecká - Bing","ophoto-m:19"),
+                        ("Turistická","turist-m:18"),
+                        ("Zeměpisná","zemepis-m:18"),
+                        ("Zimní","winter-m:18"),
+                        ("Historická 1836-1852","army2-m:15"),
+                        ("Letecká 2002-2003","ophoto0203-m:20"),
+                        ("Letecká 2004-2006","ophoto0406-m:20"),
+                        ("Letecká 2010-2012","ophoto1012-m:20"),
+                        ("Letecká 2014-2015","ophoto1415-m:20"),
+                        ("Letní","turist_aquatic-m:18"),
+                        ("Reliéfní","relief-m:15"),
+                        ("Apríl 2017","april17-m:18"),
+                        ("Apríl 2018","april18-m:18")
+                    ]))
+                ]))
+                configFileHandler = open(os.path.abspath("MapyCZforTS_settings.ini"),"a")
+                configFile_mapsetUpdate.write(configFileHandler)
+                configFileHandler.close()
+                self.mapsets = OrderedDict([
+                    ("Základní", {"name":"Základní", "maxZoom":18}),
+                    ("ophoto-m",{"name":"Letecká - Bing", "maxZoom":19}),
+                    ("turist-m",{"name":"Turistická", "maxZoom":18}),
+                    ("zemepis-m",{"name":"Zeměpisná", "maxZoom":18}),
+                    ("winter-m",{"name":"Zimní", "maxZoom":18}),
+                    ("army2-m",{"name":"Historická 1836-1852", "maxZoom":15}),
+                    ("ophoto0203-m",{"name":"Letecká 2002-2003", "maxZoom":20}),
+                    ("ophoto0406-m",{"name":"Letecká 2004-2006", "maxZoom":20}),
+                    ("ophoto1012-m",{"name":"Letecká 2010-2012", "maxZoom":20}),
+                    ("ophoto1415-m",{"name":"Letecká 2014-2015", "maxZoom":20}),
+                    ("turist_aquatic-m",{"name":"Letní", "maxZoom":18}),
+                    ("relief-m",{"name":"Reliéfní", "maxZoom":15}),
+                    ("april17-m",{"name":"Apríl 2017", "maxZoom":18}),
+                    ("april18-m",{"name":"Apríl 2018", "maxZoom":18})
+                ])
+                self.currentMapset = "ophoto-m"
+            else:
+                if len(configFile['Mapsets']) == 0:
+                    self.log("Konfigurační soubor neobsahoval ani jeden mapset! Nastavuji základní letecké mapy.")
+                    root.lift()
+                    root.attributes('-topmost', True)
+                    messagebox.showwarning("Chyba!","Konfigurační soubor neobsahoval ani jeden mapset!\nNastavuji základní letecké mapy.")
+                    root.attributes('-topmost', False)
+                    configFile_mapsetUpdate = configparser.RawConfigParser(delimiters=("="))
+                    configFile_mapsetUpdate.optionxform = str
+                    configFile_mapsetUpdate.read_dict(OrderedDict([
+                        ("Mapsets",OrderedDict([
+                            ("current","ophoto-m"),
+                            ("Základní","base-m:18"),
+                            ("Letecká - Bing","ophoto-m:19"),
+                            ("Turistická","turist-m:18"),
+                            ("Zeměpisná","zemepis-m:18"),
+                            ("Zimní","winter-m:18"),
+                            ("Historická 1836-1852","army2-m:15"),
+                            ("Letecká 2002-2003","ophoto0203-m:20"),
+                            ("Letecká 2004-2006","ophoto0406-m:20"),
+                            ("Letecká 2010-2012","ophoto1012-m:20"),
+                            ("Letecká 2014-2015","ophoto1415-m:20"),
+                            ("Letní","turist_aquatic-m:18"),
+                            ("Reliéfní","relief-m:15"),
+                            ("Apríl 2017","april17-m:18"),
+                            ("Apríl 2018","april18-m:18")
+                        ]))
+                    ]))
+                    configFileHandler = open(os.path.abspath("MapyCZforTS_settings.ini"),"a")
+                    configFile_mapsetUpdate.write(configFileHandler)
+                    configFileHandler.close()
+                    self.mapsets = OrderedDict([
+                        ("Základní", {"name":"Základní", "maxZoom":18}),
+                        ("ophoto-m",{"name":"Letecká - Bing", "maxZoom":19}),
+                        ("turist-m",{"name":"Turistická", "maxZoom":18}),
+                        ("zemepis-m",{"name":"Zeměpisná", "maxZoom":18}),
+                        ("winter-m",{"name":"Zimní", "maxZoom":18}),
+                        ("army2-m",{"name":"Historická 1836-1852", "maxZoom":15}),
+                        ("ophoto0203-m",{"name":"Letecká 2002-2003", "maxZoom":20}),
+                        ("ophoto0406-m",{"name":"Letecká 2004-2006", "maxZoom":20}),
+                        ("ophoto1012-m",{"name":"Letecká 2010-2012", "maxZoom":20}),
+                        ("ophoto1415-m",{"name":"Letecká 2014-2015", "maxZoom":20}),
+                        ("turist_aquatic-m",{"name":"Letní", "maxZoom":18}),
+                        ("relief-m",{"name":"Reliéfní", "maxZoom":15}),
+                        ("april17-m",{"name":"Apríl 2017", "maxZoom":18}),
+                        ("april18-m",{"name":"Apríl 2018", "maxZoom":18})
+                    ])
+                    self.currentMapset = "ophoto-m"
+                else:
+                    try:
+                        self.currentMapset = configFile['Mapsets']['current']
+                    except:
+                        self.log("Konfigurační soubor neobsahoval poslední použitý mapset!Nastavuji první mapset v konfigurační souboru.")
+                        root.lift()
+                        root.attributes('-topmost', True)
+                        messagebox.showwarning("Chyba!","Konfigurační soubor neobsahoval poslední použitý mapset!\nNastavuji první mapset v konfigurační souboru.")
+                        root.attributes('-topmost', False)
+                    for mapsetKey in configFile['Mapsets']:
+                        if mapsetKey != "current":
+                            _url, _maxZoom = configFile['Mapsets'][mapsetKey].split(":")
+                            self.mapsets.update({_url:{"name":mapsetKey, "maxZoom":int(_maxZoom)}})
+                            if self.currentMapset == "":
+                                self.currentMapset = _url
+
+                    configFile.set('Mapsets', 'current', self.currentMapset)
+
+                    # Writing our configuration file to 'example.ini'
+                    with open(os.path.abspath("MapyCZforTS_settings.ini"), 'w') as configFileHandler:
+                        configFile.write(configFileHandler)
         except:
             self.working_directory_path = os.path.dirname(os.path.abspath(__file__))
             self.logfile_path = os.path.join(self.working_directory_path,"MapyCZforTS.log")
-            configFile.read_dict({'Settings':{'working_directory_path': self.working_directory_path, 'debug': False}})
+            configFile = configparser.RawConfigParser(delimiters=("="))
+            configFile.optionxform = str
+            configFile.read_dict(OrderedDict([
+                ('Settings',{
+                    'working_directory_path':self.working_directory_path,
+                    'debug': False
+                }), 
+                ("Mapsets",OrderedDict([
+                    ("current","ophoto-m"),
+                    ("Základní","base-m:18"),
+                    ("Letecká - Bing","ophoto-m:19"),
+                    ("Turistická","turist-m:18"),
+                    ("Zeměpisná","zemepis-m:18"),
+                    ("Zimní","winter-m:18"),
+                    ("Historická 1836-1852","army2-m:15"),
+                    ("Letecká 2002-2003","ophoto0203-m:20"),
+                    ("Letecká 2004-2006","ophoto0406-m:20"),
+                    ("Letecká 2010-2012","ophoto1012-m:20"),
+                    ("Letecká 2014-2015","ophoto1415-m:20"),
+                    ("Letní","turist_aquatic-m:18"),
+                    ("Reliéfní","relief-m:15"),
+                    ("Apríl 2017","april17-m:18"),
+                    ("Apríl 2018","april18-m:18")
+                ]))
+            ]))
             configFileHandler = open(os.path.abspath("MapyCZforTS_settings.ini"),"w")
             configFile.write(configFileHandler)
             configFileHandler.close()
-            
-
-    def is_admin(self):
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except:
-            return False
+            self.mapsets = OrderedDict([
+                ("Základní", {"name":"Základní", "maxZoom":18}),
+                ("ophoto-m",{"name":"Letecká - Bing", "maxZoom":19}),
+                ("turist-m",{"name":"Turistická", "maxZoom":18}),
+                ("zemepis-m",{"name":"Zeměpisná", "maxZoom":18}),
+                ("winter-m",{"name":"Zimní", "maxZoom":18}),
+                ("army2-m",{"name":"Historická 1836-1852", "maxZoom":15}),
+                ("ophoto0203-m",{"name":"Letecká 2002-2003", "maxZoom":20}),
+                ("ophoto0406-m",{"name":"Letecká 2004-2006", "maxZoom":20}),
+                ("ophoto1012-m",{"name":"Letecká 2010-2012", "maxZoom":20}),
+                ("ophoto1415-m",{"name":"Letecká 2014-2015", "maxZoom":20}),
+                ("turist_aquatic-m",{"name":"Letní", "maxZoom":18}),
+                ("relief-m",{"name":"Reliéfní", "maxZoom":15}),
+                ("april17-m",{"name":"Apríl 2017", "maxZoom":18}),
+                ("april18-m",{"name":"Apríl 2018", "maxZoom":18})
+            ])
+            self.currentMapset = "ophoto-m"
 
     #log funkce
     def log(self,msg,prvniRadek=False):
@@ -122,10 +284,16 @@ class Main():
         except socket.error as e:
             if e.errno == errno.EADDRINUSE:
                 self.log("Kritická chyba! Port 80 je již otevřený jinou aplikací! Nelze pokračovat!")
+                root.lift()
+                root.attributes('-topmost', True)
                 messagebox.showerror("Kritická chyba!","Port 80 je již otevřený jinou aplikací! Nelze pokračovat!")
+                root.attributes('-topmost', False)
             elif e.errno in (errno.EACCES, getattr(errno, 'WSAEACCES', errno.EACCES)):
                 self.log("Kritická chyba! Systém zakázal přístup k portu 80! Nelze pokračovat!")
+                root.lift()
+                root.attributes('-topmost', True)
                 messagebox.showerror("Kritická chyba!","Systém zakázal přístup k portu 80!\nBuď je používaný jinou aplikací, nebo přístup blokuje antivirový program!\nNelze pokračovat!")
+                root.attributes('-topmost', False)
             else:
                 pass
                 #possible handling other errors with sockets
@@ -151,21 +319,31 @@ class Main():
                     except:
                         self.hostsEditedOK = False
                         self.log("Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
+                        root.lift()
+                        root.attributes('-topmost', True)
                         messagebox.showerror("Kritická chyba!","Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
+                        root.attributes('-topmost', False)
                         return(False)
                 elif self.parseHosts(self.winpath + "hosts")["maps.googleapis.com"] in [str(socket.gethostbyname(socket.gethostname())), "127.0.0.1"]:
                     self.wasMapsGoogleInHosts = True
+                    root.lift()
+                    root.attributes('-topmost', True)
                     if messagebox.askyesno("Co dál?",'V souboru hosts již existuje zápis pro maps.googleapis.com.\n'
                                             'Může jít o duplicitní spuštění aplikace, nebo na vašem počítači běží jiná aplikace, která přesměrovává maps.googleapis.com.'
                                             '\nPřesto spustit?'):
+                        root.attributes('-topmost', False)
                         self.hostsEditedOK = True
                         return(True)
                     else:
+                        root.attributes('-topmost', False)
                         self.hostsEditedOK = False
                         return(False)
                 else:
                     self.log("Kritická chyba! maps.googleapis.com se již v souboru hosts nachází! Nelze pokračovat!")
+                    root.lift()
+                    root.attributes('-topmost', True)
                     messagebox.showerror("Kritická chyba!","maps.googleapis.com se již v souboru hosts nachází! Nelze pokračovat!")
+                    root.attributes('-topmost', False)
                     self.wasMapsGoogleInHosts = True
                     return(False)
         else:
@@ -188,21 +366,31 @@ class Main():
                 except:
                     self.hostsEditedOK = False
                     self.log("Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
+                    root.lift()
+                    root.attributes('-topmost', True)
                     messagebox.showerror("Kritická chyba!","Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
+                    root.attributes('-topmost', False)
                     return(False)
             elif self.parseHosts(self.winpath + "hosts")["maps.googleapis.com"] in [str(socket.gethostbyname(socket.gethostname())), "127.0.0.1"]:
                 self.wasMapsGoogleInHosts = True
+                root.lift()
+                root.attributes('-topmost', True)
                 if messagebox.askyesno("Co dál?",'V souboru hosts již existuje zápis pro maps.googleapis.com.\n'
                                         'Může jít o duplicitní spuštění aplikace, nebo na vašem počítači běží jiná aplikace, která přesměrovává maps.googleapis.com.'
                                         '\nPřesto spustit?'):
                     self.hostsEditedOK = True
+                    root.attributes('-topmost', False)
                     return(True)
                 else:
                     self.hostsEditedOK = False
+                    root.attributes('-topmost', False)
                     return(False)
             else:
                 self.log("Kritická chyba! maps.googleapis.com se již v souboru hosts nachází! Nelze pokračovat!")
+                root.lift()
+                root.attributes('-topmost', True)
                 messagebox.showerror("Kritická chyba!","maps.googleapis.com se již v souboru hosts nachází! Nelze pokračovat!")
+                root.attributes('-topmost', False)
                 self.wasMapsGoogleInHosts = True
                 return(False)
 
@@ -237,7 +425,7 @@ class Main():
             if not os.path.exists(os.path.join(self.working_directory_path, "output_cache")):
                 os.makedirs(os.path.join(self.working_directory_path, "output_cache"))
 
-            if not os.path.isfile(os.path.join(self.working_directory_path, "output_cache", "{:s}-{:s}.jpg".format(str(x).replace(".","_"),str(y).replace(".","_")))):
+            if not os.path.isfile(os.path.join(self.working_directory_path, "output_cache", "{:s}_{:d}_{:s}-{:s}.jpg".format(self.currentMapset, zoom, str(x).replace(".","_"),str(y).replace(".","_")))):
                 #preved souradnice na poradove cislo pixelu z leva nahore 0,0
                 pxlX, pxlY = self.ziskejPixelZWGS(x, y, zoom)
 
@@ -265,9 +453,9 @@ class Main():
                 stazeneCtverce = []
                 for y_number in range(stredovyTileY - pocetTiluNahoru, stredovyTileY + pocetTiluDolu+1):
                     for x_number in range(stredovyTileX - pocetTiluDoleva, stredovyTileX + pocetTiluDoprava+1):
-                        if not os.path.isfile(os.path.join(self.working_directory_path, "mapy_cz_cache", "{:d}-{:d}-{:d}.jpg".format(zoom,x_number,y_number))):
-                            urllib.request.urlretrieve("https://mapserver.mapy.cz/ophoto1415-m/{:d}-{:d}-{:d}".format(zoom,x_number,y_number), os.path.join(self.working_directory_path, "mapy_cz_cache", "{:d}-{:d}-{:d}.jpg".format(zoom,x_number,y_number)))
-                        stazeneCtverce.append(os.path.join(self.working_directory_path, "mapy_cz_cache", "{:d}-{:d}-{:d}.jpg".format(zoom,x_number,y_number)))
+                        if not os.path.isfile(os.path.join(self.working_directory_path, "mapy_cz_cache", "{:s}_{:d}_{:d}-{:d}.jpg".format(self.currentMapset,zoom,x_number,y_number))):
+                            urllib.request.urlretrieve("https://mapserver.mapy.cz/{:s}/{:d}-{:d}-{:d}".format(self.currentMapset,zoom,x_number,y_number), os.path.join(self.working_directory_path, "mapy_cz_cache", "{:s}_{:d}_{:d}-{:d}.jpg".format(self.currentMapset,zoom,x_number,y_number)))
+                        stazeneCtverce.append(os.path.join(self.working_directory_path, "mapy_cz_cache", "{:s}_{:d}_{:d}-{:d}.jpg".format(self.currentMapset,zoom,x_number,y_number)))
                 
                 pilCtverce = map(Image.open, stazeneCtverce)
 
@@ -297,7 +485,7 @@ class Main():
                 vyslednyObrazek = vyslednyObrazek.resize((rozliseniX*scale,rozliseniY*scale), Image.ANTIALIAS)
 
                 #uloz obrazek
-                vyslednyObrazek.save(os.path.join(self.working_directory_path, "output_cache", "{:s}-{:s}.jpg".format(str(x).replace(".","_"),str(y).replace(".","_"))), "JPEG", quality=75, optimize=True, progressive=True)
+                vyslednyObrazek.save(os.path.join(self.working_directory_path, "output_cache", "{:s}_{:d}_{:s}-{:s}.jpg".format(self.currentMapset, zoom, str(x).replace(".","_"),str(y).replace(".","_"))), "JPEG", quality=75, optimize=True, progressive=True)
 
             else:
                 if self.debug:
@@ -311,13 +499,13 @@ class Main():
             pozadavek.send_header('Cache-Control', 'public, max-age=86400')
             pozadavek.send_header('Vary', 'Accept-Language')
             pozadavek.send_header('Access-Control-Allow-Origin', '*')
-            pozadavek.send_header('Content-Length', os.path.getsize(os.path.join(self.working_directory_path, "output_cache", "{:s}-{:s}.jpg".format(str(x).replace(".","_"),str(y).replace(".","_")))))
+            pozadavek.send_header('Content-Length', os.path.getsize(os.path.join(self.working_directory_path, "output_cache", "{:s}_{:d}_{:s}-{:s}.jpg".format(self.currentMapset, zoom, str(x).replace(".","_"),str(y).replace(".","_")))))
             pozadavek.send_header('X-XSS-Protection', '1; mode=block')
             pozadavek.send_header('X-Frame-Options', 'SAMEORIGIN')
             #odesli hlavicky
             pozadavek.end_headers()
             #posli obrazek
-            pozadavek.wfile.write(open(os.path.join(self.working_directory_path, "output_cache", "{:s}-{:s}.jpg".format(str(x).replace(".","_"),str(y).replace(".","_"))),'rb').read())
+            pozadavek.wfile.write(open(os.path.join(self.working_directory_path, "output_cache", "{:s}_{:d}_{:s}-{:s}.jpg".format(self.currentMapset, zoom, str(x).replace(".","_"),str(y).replace(".","_"))),'rb').read())
             self.log("Obrázek odeslaný OK!")
             if self.debug:
                 print("")
@@ -358,47 +546,43 @@ class Main():
             self.appAlreadyEnded = True
 
     def main(self):
-        if self.is_admin():
-            self.log("Start aplikace!",True)
-            self.log("Vyhledávám složku etc!")
-            #Najdi Windows\System32\drivers\etc
-            self.winpath = os.environ['WINDIR'] + "\\System32\\drivers\\etc\\"
-            
-            if os.path.isdir(self.winpath):
-                self.log("Složka etc nalezena!")
-            else:
-                self.log("Složka etc nebyla nalezena! Nelze pokračovat!")
-                messagebox.showerror("Kritická chyba!","Složka etc nebyla nalezena! Nelze pokračovat!")
-                return(False)
-
-            if not os.path.isfile(self.winpath+"hosts"):
-                self.log("Ve složce chybí soubor hosts! Nejde pokračovat!")
-                messagebox.showerror("Kritická chyba!","Ve složce etc chybí soubor hosts! Nejde pokračovat!")
-                return(False)
-
-            if not self.checkIfHTTPisFree():
-                return(False)
-
-            self.serverClass = HTTP_handler()
-
-            self.log("Nastavuji on close callback!")
-            atexit.register(self.appExit)
-
-            if self.zalohujANastavVlastniHosts():
-                self.log("OK!")
-                return(True)
-            else:
-                # self.log("Nelze pokračovat, aplikace bude ukončena!")
-                return(False)
+        self.log("Start aplikace!",True)
+        self.log("Vyhledávám složku etc!")
+        #Najdi Windows\System32\drivers\etc
+        self.winpath = os.environ['WINDIR'] + "\\System32\\drivers\\etc\\"
+        
+        if os.path.isdir(self.winpath):
+            self.log("Složka etc nalezena!")
         else:
-            # Ask for re-run the program with admin rights
-            if messagebox.askyesno("Co dál?",'Aplikace nebyla spuštěna jako správce.\n'
-                                    'To je ale vzhledem k editaci souboru hosts v systémové složce Windows nezbytně nutné.'
-                                    '\nRestartovat aplikaci jako správce?'):
-                ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)
-                return(False)
-            else:
-                return(False)
+            self.log("Složka etc nebyla nalezena! Nelze pokračovat!")
+            root.lift()
+            root.attributes('-topmost', True)
+            messagebox.showerror("Kritická chyba!","Složka etc nebyla nalezena! Nelze pokračovat!")
+            root.attributes('-topmost', False)
+            return(False)
+
+        if not os.path.isfile(self.winpath+"hosts"):
+            self.log("Ve složce chybí soubor hosts! Nejde pokračovat!")
+            root.lift()
+            root.attributes('-topmost', True)
+            messagebox.showerror("Kritická chyba!","Ve složce etc chybí soubor hosts! Nejde pokračovat!")
+            root.attributes('-topmost', False)
+            return(False)
+
+        if not self.checkIfHTTPisFree():
+            return(False)
+
+        self.serverClass = HTTP_handler()
+
+        self.log("Nastavuji on close callback!")
+        atexit.register(self.appExit)
+
+        if self.zalohujANastavVlastniHosts():
+            self.log("OK!")
+            return(True)
+        else:
+            # self.log("Nelze pokračovat, aplikace bude ukončena!")
+            return(False)
 
 class Window():
     def closeApplication(self):
@@ -408,23 +592,30 @@ class Window():
         M.debug = not M.debug
 
         try:
-            configFile = configparser.RawConfigParser()
-            configFile.read_dict({'Settings':{'working_directory_path': M.working_directory_path, 'debug': M.debug}})
-            configFileHandler = open(os.path.abspath("MapyCZforTS_settings.ini"),"w")
-            configFile.write(configFileHandler)
-            configFileHandler.close()
+            configFile = configparser.RawConfigParser(delimiters=("="))
+            configFile.optionxform = str
+            configFile.read(os.path.abspath("MapyCZforTS_settings.ini"))
+            configFile.set('Settings', 'working_directory_path', M.working_directory_path)
+
+            # Writing our configuration file to 'example.ini'
+            with open(os.path.abspath("MapyCZforTS_settings.ini"), 'w') as configFileHandler:
+                configFile.write(configFileHandler)
         except:
             M.log("Nepovedlo se uložit změny!")
             M.debug = not M.debug
             self.mainMenuDebugChBoxValue.set(M.debug)
+            root.lift()
+            root.attributes('-topmost', True)
             messagebox.showinfo(title="Chyba!", message="Nepovedlo se uložit změny!\nOvěřte, zda má aplikace přístup ke konfiguračnímu souboru a zkuste to znovu.")
+            root.attributes('-topmost', False)
     
     def chooseWorkingDirectory(self):
         oldWD = M.working_directory_path
         M.working_directory_path = filedialog.askdirectory()
 
         try:
-            configFile = configparser.RawConfigParser()
+            configFile = configparser.RawConfigParser(delimiters=("="))
+            configFile.optionxform = str
             configFile.read_dict({'Settings':{'working_directory_path': M.working_directory_path, 'debug': M.debug}})
             configFileHandler = open(os.path.abspath("MapyCZforTS_settings.ini"),"w")
             configFile.write(configFileHandler)
@@ -432,7 +623,10 @@ class Window():
         except:
             M.log("Nepovedlo se uložit změny!")
             M.working_directory_path = oldWD
+            root.lift()
+            root.attributes('-topmost', True)
             messagebox.showinfo(title="Chyba!", message="Nepovedlo se uložit změny!\nOvěřte, zda má aplikace přístup ke konfiguračnímu souboru a zkuste to znovu.")
+            root.attributes('-topmost', False)
         
         M.logfile_path = os.path.join(M.working_directory_path,"MapyCZforTS.log")
 
@@ -456,7 +650,10 @@ class Window():
                                 exception = True
             if exception:
                 M.log("Nepovedlo se vyčistit některé cacheované tily, nové tily se nemusí správně zobrazit!")
+                root.lift()
+                root.attributes('-topmost', True)
                 messagebox.showwarning("Neznámá chyba!", "Nepovedlo se vyčistit některé cacheované tily, nové tily se nemusí správně zobrazit!")
+                root.attributes('-topmost', False)
             elif not deleted:
                 M.log("Nebyly nalezeny žádné soubory TS cache! Nothing to do!")
         except:
@@ -478,7 +675,10 @@ class Window():
                                 exception = True
             if exception:
                 M.log("Nepovedlo se vyčistit některé cacheované tily, nové tily se nemusí správně zobrazit!")
+                root.lift()
+                root.attributes('-topmost', True)
                 messagebox.showwarning("Neznámá chyba!", "Nepovedlo se vyčistit některé cacheované tily, nové tily se nemusí správně zobrazit!")
+                root.attributes('-topmost', False)
             elif not deleted:
                 M.log("Nebyly nalezeny žádné soubory TS cache! Nothing to do!")
         except:
@@ -513,14 +713,48 @@ class Window():
         except:
             M.log("Složka mapy_cz_cache neexistuje. Nothing to do!")
 
-        messagebox.showinfo("Hotovo", "Cache úspěšně vymazaná!")
         M.log("Cache fuč!")
+        root.lift()
+        root.attributes('-topmost', True)
+        messagebox.showinfo("Hotovo", "Cache úspěšně vymazaná!")
+        root.attributes('-topmost', False)
+
+    def mapSetsClicked(self):
+        M.currentMapset = self.mapovyPodkladVar.get()
+        zoom = M.mapsets[M.currentMapset]["maxZoom"]
+        zleva = zoom - 13
+        zprava = 21 - zoom
+        if zleva > zprava:
+            root.lift()
+            root.attributes('-topmost', True)
+            messagebox.showinfo("Změna mapového podkladu","Změna mapového podkladu proběhla úspěšně!\nNově nastavený mapový podklad má maximální\nzoom {:d}, tj. {:d}. pozice posuvníku ve hře zprava!".format(zoom, zprava))
+            root.attributes('-topmost', False)
+        else:
+            root.lift()
+            root.attributes('-topmost', True)
+            messagebox.showinfo("Změna mapového podkladu","Změna mapového podkladu proběhla úspěšně!\nNově nastavený mapový podklad má maximální\nzoom {:d}, tj. {:d}. pozice posuvníku ve hře zleva!".format(zoom, zleva))
+            root.attributes('-topmost', False)
+        try:
+            configFile = configparser.RawConfigParser(delimiters=("="))
+            configFile.optionxform = str
+            configFile.read(os.path.abspath("MapyCZforTS_settings.ini"))
+            configFile.set('Mapsets', 'current', self.mapovyPodkladVar.get())
+
+            # Writing our configuration file to 'example.ini'
+            with open(os.path.abspath("MapyCZforTS_settings.ini"), 'w') as configFileHandler:
+                configFile.write(configFileHandler)
+        except:
+            M.log("Nepovedlo se uložit změny!")
+            root.lift()
+            root.attributes('-topmost', True)
+            messagebox.showinfo(title="Chyba!", message="Nepovedlo se uložit změny!\nOvěřte, zda má aplikace přístup ke konfiguračnímu souboru a zkuste to znovu.")
+            root.attributes('-topmost', False)
 
     def appWindowCreator(self):
         M.log("Sestavuji GUI rozhraní aplikace!")
         root.option_add('*tearOff', FALSE)
-        root.title("MapyCZforTS v.0.3.0.2")
-        root.minsize(256,256)
+        root.title("MapyCZforTS v.0.4.1.4")
+        root.minsize(350,350)
 
         root.columnconfigure(0, weight=1)
         root.columnconfigure(1, weight=1)
@@ -555,13 +789,23 @@ class Window():
         self.mainMenuNastaveni.add_checkbutton(label="Zapisovat do logu detailní informace", command=self.debugTriggered, variable=self.mainMenuDebugChBoxValue)
         self.mainMenuNastaveni.add_command(label="Nastav pracovní adresář", command=self.chooseWorkingDirectory)
 
+        self.mainMenuMapovyPodklad = Menu(self.mainMenu)
+        self.mapovyPodkladVar = StringVar()
+        self.mapovyPodkladVar.set(M.currentMapset)
+        for mapset in M.mapsets:
+            self.mainMenuMapovyPodklad.add_radiobutton(label=M.mapsets[mapset]["name"], command=self.mapSetsClicked, value=mapset, variable=self.mapovyPodkladVar)
+
         self.mainMenu.add_cascade(menu=self.mainMenuSoubor, label="Soubor")
         self.mainMenu.add_cascade(menu=self.mainMenuNastaveni, label="Nastavení")
+        self.mainMenu.add_cascade(menu=self.mainMenuMapovyPodklad, label="Mapové podklady")
         self.mainMenu.add_command(label="Vymaž cache", command=self.deleteCache)
 
         root["menu"] = self.mainMenu
 
         root.deiconify()
+        root.lift()
+        root.attributes('-topmost', True)
+        root.attributes('-topmost', False)
         root.mainloop()
 
 class HTTP_handler():
@@ -615,10 +859,21 @@ class WebServerClass(BaseHTTPRequestHandler):
 
 M = Main()
 W = Window()
-try:
-    if M.main():
-        W.appWindowCreator()
+
+if is_admin():
+    try:
+        if M.main():
+            W.appWindowCreator()
+            M.appExit()
+    except KeyboardInterrupt:
+        M.log("User keyboard interrupt!")
         M.appExit()
-except KeyboardInterrupt:
-    M.log("User keyboard interrupt!")
-    M.appExit()
+else:
+    # Ask for re-run the program with admin rights
+    root.lift()
+    root.attributes('-topmost', True)
+    if messagebox.askyesno("Co dál?",'Aplikace nebyla spuštěna jako správce.\n'
+                            'To je ale vzhledem k editaci souboru hosts v systémové složce Windows nezbytně nutné.'
+                            '\nRestartovat aplikaci jako správce?'):
+        root.attributes('-topmost', False)
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)
