@@ -252,8 +252,8 @@ class Main():
     def obnovZalohuHosts(self):
         if not self.wasMapsGoogleInHosts:
             self.log("Obnovuji zálohu souboru hosts!")
-            if os.path.isfile(self.winpath + "hosts.gmBAK"):
-                move(self.winpath + "hosts.gmBAK", self.winpath + "hosts")
+            if os.path.isfile(os.path.join(self.winpath, "hosts.gmBAK")):
+                move(os.path.join(self.winpath, "hosts.gmBAK"), os.path.join(self.winpath, "hosts"))
                 self.log("Záloha hosts byla úspěšně obnovena!")
                 return(True)
             else:
@@ -304,14 +304,14 @@ class Main():
     #funkce na zalohovani souboru hosts
     def zalohujANastavVlastniHosts(self):
         self.hostsEditedOK = False
-        if not os.path.isfile(self.winpath + "hosts.gmBAK"):
-                if not "maps.googleapis.com" in self.parseHosts(self.winpath + "hosts"):
+        if not os.path.isfile(os.path.join(self.winpath, "hosts.gmBAK")):
+                if not "maps.googleapis.com" in self.parseHosts(os.path.join(self.winpath, "hosts")):
                     self.log("Zálohuji soubor hosts!")
-                    copyfile(self.winpath + "hosts", self.winpath + "hosts.gmBAK")
+                    copyfile(os.path.join(self.winpath, "hosts"), os.path.join(self.winpath, "hosts.gmBAK"))
                     self.log("Nastavuji maps.googleapis.com na adresu "+str(socket.gethostbyname(socket.gethostname()))+"!")
                     self.wasMapsGoogleInHosts = False
                     try:
-                        hosts = open(self.winpath + "hosts", "a")
+                        hosts = open(os.path.join(self.winpath, "hosts"), "a")
                         hosts.write("\n"+str(socket.gethostbyname(socket.gethostname()))+" maps.googleapis.com")
                         hosts.close()
                         self.hostsEditedOK = True
@@ -324,7 +324,7 @@ class Main():
                         messagebox.showerror("Kritická chyba!","Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
                         root.attributes('-topmost', False)
                         return(False)
-                elif self.parseHosts(self.winpath + "hosts")["maps.googleapis.com"] in [str(socket.gethostbyname(socket.gethostname())), "127.0.0.1"]:
+                elif self.parseHosts(os.path.join(self.winpath, "hosts"))["maps.googleapis.com"] in [str(socket.gethostbyname(socket.gethostname())), "127.0.0.1"]:
                     self.wasMapsGoogleInHosts = True
                     root.lift()
                     root.attributes('-topmost', True)
@@ -349,16 +349,16 @@ class Main():
         else:
             self.log("Obnovuji nalezený soubor zálohy! Předchozí instance pravděpodobně nebyla správně ukončena!")
             try:
-                move(self.winpath + "hosts.gmBAK", self.winpath + "hosts")
+                move(os.path.join(self.winpath, "hosts.gmBAK"), os.path.join(self.winpath, "hosts"))
             except:
                 self.log("Jejda! Něco se nepovedlo. Záloha souboru hosts nemohla být obnovena!")
-            if not "maps.googleapis.com" in self.parseHosts(self.winpath + "hosts"):
+            if not "maps.googleapis.com" in self.parseHosts(os.path.join(self.winpath, "hosts")):
                 self.log("Zálohuji soubor hosts!")
-                copyfile(self.winpath + "hosts", self.winpath + "hosts.gmBAK")
+                copyfile(os.path.join(self.winpath, "hosts"), os.path.join(self.winpath, "hosts.gmBAK"))
                 self.log("Nastavuji maps.googleapis.com na adresu "+str(socket.gethostbyname(socket.gethostname()))+"!")
                 self.wasMapsGoogleInHosts = False
                 try:
-                    hosts = open(self.winpath + "hosts", "a")
+                    hosts = open(os.path.join(self.winpath, "hosts"), "a")
                     hosts.write("\n"+str(socket.gethostbyname(socket.gethostname()))+" maps.googleapis.com")
                     hosts.close()
                     self.hostsEditedOK = True
@@ -371,7 +371,7 @@ class Main():
                     messagebox.showerror("Kritická chyba!","Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
                     root.attributes('-topmost', False)
                     return(False)
-            elif self.parseHosts(self.winpath + "hosts")["maps.googleapis.com"] in [str(socket.gethostbyname(socket.gethostname())), "127.0.0.1"]:
+            elif self.parseHosts(os.path.join(self.winpath, "hosts"))["maps.googleapis.com"] in [str(socket.gethostbyname(socket.gethostname())), "127.0.0.1"]:
                 self.wasMapsGoogleInHosts = True
                 root.lift()
                 root.attributes('-topmost', True)
@@ -549,7 +549,8 @@ class Main():
         self.log("Start aplikace!",True)
         self.log("Vyhledávám složku etc!")
         #Najdi Windows\System32\drivers\etc
-        self.winpath = os.environ['WINDIR'] + "\\System32\\drivers\\etc\\"
+        self.winpath = os.path.join(os.environ['WINDIR'], "System32", "drivers", "etc")
+        self.log("Soubor etc je ve složce {:s}!".format(self.winpath))
         
         if os.path.isdir(self.winpath):
             self.log("Složka etc nalezena!")
@@ -561,7 +562,7 @@ class Main():
             root.attributes('-topmost', False)
             return(False)
 
-        if not os.path.isfile(self.winpath+"hosts"):
+        if not os.path.isfile(os.path.join(self.winpath,"hosts")):
             self.log("Ve složce chybí soubor hosts! Nejde pokračovat!")
             root.lift()
             root.attributes('-topmost', True)
