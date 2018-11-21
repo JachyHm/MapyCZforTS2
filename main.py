@@ -263,27 +263,30 @@ class Main():
 
     #parse hosts file and return hosts array
     def parseHosts(self, hosts_path):
-        # try:
-        hostsHandler = open(hosts_path, "r")
-        hosts_array = {}
-        for line in hostsHandler.read().split("\n"):
-            i = 0   
-            znak = " "
-            if line[i:i+1] == "#":
-                continue
-            while znak == " ":
-                znak = line[i:i+1]
-                i += 1
-            if line[i:i+1] == "#":
-                continue
-            dst_adress, src_adress = line.split(" ")
-            if not src_adress in hosts_array:
-                hosts_array[src_adress] = dst_adress
-            else:
-                self.log("V souboru hosts se pravděpodobně nachází chyba! Přeskakuji opakovaný výskyt {:s}!".format(src_adress))
-        return(hosts_array)
-        # except:
-        #     return {}
+        try:
+            hostsHandler = open(hosts_path, "r")
+            hosts_array = {}
+            for line in hostsHandler.read().split("\n"):
+                i = 0   
+                znak = " "
+                if line[i:i+1] == "#":
+                    continue
+                while znak == " ":
+                    znak = line[i:i+1]
+                    i += 1
+                if line[i:i+1] == "#":
+                    continue
+                try:
+                    dst_adress, src_adress = line.split(" ")
+                    if not src_adress in hosts_array:
+                        hosts_array[src_adress] = dst_adress
+                    else:
+                        self.log("V souboru hosts se pravděpodobně nachází chyba! Přeskakuji opakovaný výskyt {:s}!".format(src_adress))
+                except:
+                    continue
+            return(hosts_array)
+        except:
+            return {}
 
     #check if http port 80 is free
     def checkIfHTTPisFree(self):
