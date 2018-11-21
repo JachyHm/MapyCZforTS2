@@ -314,8 +314,12 @@ class Main():
                         hosts = open(os.path.join(self.winpath, "hosts"), "a")
                         hosts.write("\n"+str(socket.gethostbyname(socket.gethostname()))+" maps.googleapis.com")
                         hosts.close()
-                        self.hostsEditedOK = True
-                        return(True)
+                        if "maps.googleapis.com" in self.parseHosts(os.path.join(self.winpath, "hosts")):
+                            self.hostsEditedOK = True
+                            return(True)
+                        else:
+                            self.log("Zápis do souboru hosts proběhl úspěšně, ale při ověření nebyl záznam maps.googleapis.com nalezený! Kritická chyba, nelze pokračovat!")
+                            return(False)
                     except:
                         self.hostsEditedOK = False
                         self.log("Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
@@ -361,8 +365,12 @@ class Main():
                     hosts = open(os.path.join(self.winpath, "hosts"), "a")
                     hosts.write("\n"+str(socket.gethostbyname(socket.gethostname()))+" maps.googleapis.com")
                     hosts.close()
-                    self.hostsEditedOK = True
-                    return(True)
+                    if "maps.googleapis.com" in self.parseHosts(os.path.join(self.winpath, "hosts")):
+                        self.hostsEditedOK = True
+                        return(True)
+                    else:
+                        self.log("Zápis do souboru hosts proběhl úspěšně, ale při ověření nebyl záznam maps.googleapis.com nalezený! Kritická chyba, nelze pokračovat!")
+                        return(False)
                 except:
                     self.hostsEditedOK = False
                     self.log("Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
@@ -633,6 +641,11 @@ class Window():
 
     def turnOnTurnOffTriggered(self):
         M.replaceGoogleImg = not M.replaceGoogleImg
+        if M.replaceGoogleImg:
+            M.log("Zapínám překládání obrázků!")
+        else:
+            M.log("Vypínám překládání obrázků!")
+
         appdata_path = os.environ["LOCALAPPDATA"]
         M.log("Mažu TS cache mapových podkladů!")
         #win8 + 10
@@ -754,7 +767,7 @@ class Window():
     def appWindowCreator(self):
         M.log("Sestavuji GUI rozhraní aplikace!")
         root.option_add('*tearOff', FALSE)
-        root.title("MapyCZforTS v.0.4.1.4")
+        root.title("MapyCZforTS v.0.4.1.5")
         root.minsize(350,350)
 
         root.columnconfigure(0, weight=1)
