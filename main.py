@@ -263,18 +263,27 @@ class Main():
 
     #parse hosts file and return hosts array
     def parseHosts(self, hosts_path):
-        try:
-            hostsHandler = open(hosts_path, "r")
-            hosts_array = {}
-            for line in hostsHandler.read().split("\n"):
-                dst_adress, src_adress = line.split(" ")
-                if not src_adress in hosts_array:
-                    hosts_array[src_adress] = dst_adress
-                else:
-                    self.log("V souboru hosts se pravděpodobně nachází chyba! Přeskakuji opakovaný výskyt {:s}!".format(src_adress))
-            return(hosts_array)
-        except:
-            return {}
+        # try:
+        hostsHandler = open(hosts_path, "r")
+        hosts_array = {}
+        for line in hostsHandler.read().split("\n"):
+            i = 0   
+            znak = " "
+            if line[i:i+1] == "#":
+                continue
+            while znak == " ":
+                znak = line[i:i+1]
+                i += 1
+            if line[i:i+1] == "#":
+                continue
+            dst_adress, src_adress = line.split(" ")
+            if not src_adress in hosts_array:
+                hosts_array[src_adress] = dst_adress
+            else:
+                self.log("V souboru hosts se pravděpodobně nachází chyba! Přeskakuji opakovaný výskyt {:s}!".format(src_adress))
+        return(hosts_array)
+        # except:
+        #     return {}
 
     #check if http port 80 is free
     def checkIfHTTPisFree(self):
@@ -308,11 +317,11 @@ class Main():
                 if not "maps.googleapis.com" in self.parseHosts(os.path.join(self.winpath, "hosts")):
                     self.log("Zálohuji soubor hosts!")
                     copyfile(os.path.join(self.winpath, "hosts"), os.path.join(self.winpath, "hosts.gmBAK"))
-                    self.log("Nastavuji maps.googleapis.com na adresu "+str(socket.gethostbyname(socket.gethostname()))+"!")
+                    self.log("Nastavuji maps.googleapis.com na adresu 127.0.0.1!")
                     self.wasMapsGoogleInHosts = False
                     try:
                         hosts = open(os.path.join(self.winpath, "hosts"), "a")
-                        hosts.write("\n"+str(socket.gethostbyname(socket.gethostname()))+" maps.googleapis.com")
+                        hosts.write("\n127.0.0.1 maps.googleapis.com")
                         hosts.close()
                         if "maps.googleapis.com" in self.parseHosts(os.path.join(self.winpath, "hosts")):
                             self.hostsEditedOK = True
@@ -328,7 +337,7 @@ class Main():
                         messagebox.showerror("Kritická chyba!","Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
                         root.attributes('-topmost', False)
                         return(False)
-                elif self.parseHosts(os.path.join(self.winpath, "hosts"))["maps.googleapis.com"] in [str(socket.gethostbyname(socket.gethostname())), "127.0.0.1"]:
+                elif self.parseHosts(os.path.join(self.winpath, "hosts"))["maps.googleapis.com"] == "127.0.0.1":
                     self.wasMapsGoogleInHosts = True
                     root.lift()
                     root.attributes('-topmost', True)
@@ -359,11 +368,11 @@ class Main():
             if not "maps.googleapis.com" in self.parseHosts(os.path.join(self.winpath, "hosts")):
                 self.log("Zálohuji soubor hosts!")
                 copyfile(os.path.join(self.winpath, "hosts"), os.path.join(self.winpath, "hosts.gmBAK"))
-                self.log("Nastavuji maps.googleapis.com na adresu "+str(socket.gethostbyname(socket.gethostname()))+"!")
+                self.log("Nastavuji maps.googleapis.com na adresu 127.0.0.1!")
                 self.wasMapsGoogleInHosts = False
                 try:
                     hosts = open(os.path.join(self.winpath, "hosts"), "a")
-                    hosts.write("\n"+str(socket.gethostbyname(socket.gethostname()))+" maps.googleapis.com")
+                    hosts.write("\n127.0.0.1 maps.googleapis.com")
                     hosts.close()
                     if "maps.googleapis.com" in self.parseHosts(os.path.join(self.winpath, "hosts")):
                         self.hostsEditedOK = True
@@ -379,7 +388,7 @@ class Main():
                     messagebox.showerror("Kritická chyba!","Nepovedlo se zapsat do souboru hosts! Nelze pokračovat!")
                     root.attributes('-topmost', False)
                     return(False)
-            elif self.parseHosts(os.path.join(self.winpath, "hosts"))["maps.googleapis.com"] in [str(socket.gethostbyname(socket.gethostname())), "127.0.0.1"]:
+            elif self.parseHosts(os.path.join(self.winpath, "hosts"))["maps.googleapis.com"] == "127.0.0.1":
                 self.wasMapsGoogleInHosts = True
                 root.lift()
                 root.attributes('-topmost', True)
@@ -604,9 +613,9 @@ class Window():
             configFile = configparser.RawConfigParser(delimiters=("="))
             configFile.optionxform = str
             configFile.read(os.path.abspath("MapyCZforTS_settings.ini"))
-            configFile.set('Settings', 'working_directory_path', M.working_directory_path)
+            configFile.set('Settings', 'debug', M.debug)
 
-            # Writing our configuration file to 'example.ini'
+            # Writing our configuration file to 'MapyCZforTS_settings.ini'
             with open(os.path.abspath("MapyCZforTS_settings.ini"), 'w') as configFileHandler:
                 configFile.write(configFileHandler)
         except:
@@ -625,10 +634,12 @@ class Window():
         try:
             configFile = configparser.RawConfigParser(delimiters=("="))
             configFile.optionxform = str
-            configFile.read_dict({'Settings':{'working_directory_path': M.working_directory_path, 'debug': M.debug}})
-            configFileHandler = open(os.path.abspath("MapyCZforTS_settings.ini"),"w")
-            configFile.write(configFileHandler)
-            configFileHandler.close()
+            configFile.read(os.path.abspath("MapyCZforTS_settings.ini"))
+            configFile.set('Settings', 'working_directory_path', M.working_directory_path)
+
+            # Writing our configuration file to 'MapyCZforTS_settings.ini'
+            with open(os.path.abspath("MapyCZforTS_settings.ini"), 'w') as configFileHandler:
+                configFile.write(configFileHandler)
         except:
             M.log("Nepovedlo se uložit změny!")
             M.working_directory_path = oldWD
@@ -767,7 +778,7 @@ class Window():
     def appWindowCreator(self):
         M.log("Sestavuji GUI rozhraní aplikace!")
         root.option_add('*tearOff', FALSE)
-        root.title("MapyCZforTS v.0.4.1.5")
+        root.title("MapyCZforTS v.0.5.1.6")
         root.minsize(350,350)
 
         root.columnconfigure(0, weight=1)
@@ -878,6 +889,8 @@ if is_admin():
     try:
         if M.main():
             W.appWindowCreator()
+            M.appExit()
+        else:
             M.appExit()
     except KeyboardInterrupt:
         M.log("User keyboard interrupt!")
