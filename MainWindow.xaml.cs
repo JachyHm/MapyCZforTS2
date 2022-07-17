@@ -1,17 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MapyCZforTS_CS
 {
@@ -23,6 +11,12 @@ namespace MapyCZforTS_CS
         public MainWindow()
         {
             InitializeComponent();
+            var px = new ProxyServer(5001);
+            px.Start();
+
+            //Image img = new(16.1110678, 50.1822833, 4096, 4096, 1, 20);
+            //string fname = img.Get();
+            //Console.WriteLine(fname);
         }
     }
 }
