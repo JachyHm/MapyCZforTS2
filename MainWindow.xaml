@@ -13,13 +13,13 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
             <MenuItem Header="Soubor">
-                <MenuItem Header="Konce" />
+                <MenuItem Header="Konec" />
             </MenuItem>
             <MenuItem Header="Nastavení">
-                <MenuItem Header="Pokjročilý logging" IsCheckable="True"/>
-                <MenuItem Header="Změna pracovního adrtesáře" />
+                <MenuItem Header="Pokročilý logging" IsCheckable="True" />
+                <MenuItem Header="Změna pracovního adresáře" />
             </MenuItem>
-            <MenuItem Header="O aplikaci..."/>
+            <MenuItem Header="O aplikaci..." />
         </Menu>
     </Grid>
 </Window>
