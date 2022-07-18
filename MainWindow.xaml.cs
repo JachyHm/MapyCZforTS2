@@ -74,10 +74,16 @@ namespace MapyCZforTS_CS
                     {
                         //byte[] bodyBytes = await e.GetResponseBody();
                         //e.SetResponseBody(bodyBytes);
+                        try
+                        {
+                            string body = await e.GetResponseBodyAsString();
+                            body = body.Replace("Praha", "Prdel swiata");
+                            e.SetResponseBodyString(body);
+                        }
+                        catch (Exception ex)
+                        {
 
-                        string body = await e.GetResponseBodyAsString();
-                        body = body.Replace("Praha", "Prdel swiata");
-                        e.SetResponseBodyString(body);
+                        }
                     }
                 }
             }
