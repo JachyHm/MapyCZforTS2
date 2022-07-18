@@ -11,4 +11,10 @@
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Titanium.Web.Proxy">
+      <HintPath>Titanium.Web.Proxy.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

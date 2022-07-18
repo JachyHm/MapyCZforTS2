@@ -8,14 +8,14 @@ using System.Web;
 
 namespace MapyCZforTS_CS
 {
-    public class ProxyServer : IDisposable
+    public class ProxyServer2 : IDisposable
     {
-        private const string UriPrefix = "http://maps.googleapis.com/";
+        private const string UriPrefix = "http://maps.googleapis.com";
 
         private readonly HttpListener _listener;
         private static readonly HttpClient _client = new();
 
-        public ProxyServer(int port)
+        public ProxyServer2(int port)
         {
             _listener = new HttpListener();
             Prefixes.Add($"http://127.0.0.1:{port}/");
@@ -49,7 +49,7 @@ namespace MapyCZforTS_CS
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (context.Request.Url?.Host.IndexOf(UriPrefix, StringComparison.OrdinalIgnoreCase) >= 0)
+            if (context.Request.Url?.Host.Contains(UriPrefix, StringComparison.OrdinalIgnoreCase) ?? false)
             {
                 var query = HttpUtility.ParseQueryString(context.Request.Url?.ToString() ?? String.Empty);
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -41,7 +43,7 @@ namespace MapyCZforTS_CS
     {
         public static (int, int) GetPixelFromWGS(double x, double y, byte zoom)
         {
-            uint world_size = (uint)Math.Pow(2,(zoom + 8));
+            uint world_size = (uint)Math.Pow(2, (zoom + 8));
 
             double f = Math.Min(Math.Max(Math.Sin(y * Math.PI / 180), -0.9999), 0.9999);
 
@@ -72,29 +74,29 @@ namespace MapyCZforTS_CS
 
         private readonly string OutFname;
 
-        public System.Drawing.Bitmap? OutImage { get; private set; }
+        public Bitmap? OutImage { get; private set; }
 
         public Image(double wgsX, double wgsY, int resX, int resY, int scale, byte zoom)
         {
             (int pxlX, int pxlY) = GetPixelFromWGS(wgsX, wgsY, zoom);
 
             //X variables
-            double leftMargin = pxlX%256;
-            int centerTileX = (int)Math.Ceiling((double)pxlX/256);
+            double leftMargin = pxlX % 256;
+            int centerTileX = (int)Math.Ceiling((double)pxlX / 256);
             xOffset = (256 - Math.Floor((resX / 2 - leftMargin) % 256)) % 256;
 
-            int nLeftTiles = (int)Math.Ceiling((resX/2 - leftMargin + xOffset)/256);
-            int nRightTiles = (int)Math.Ceiling((resX/2 - (256 - leftMargin))/256);
+            int nLeftTiles = (int)Math.Ceiling((resX / 2 - leftMargin + xOffset) / 256);
+            int nRightTiles = (int)Math.Ceiling((resX / 2 - (256 - leftMargin)) / 256);
 
             SourceTiles.nTiles horizontalTiles = new(centerTileX, nLeftTiles, nRightTiles);
 
             //Y variables
-            double topMargin = pxlY%256;
-            int centerTileY = (int)Math.Ceiling((double)pxlY/256);
+            double topMargin = pxlY % 256;
+            int centerTileY = (int)Math.Ceiling((double)pxlY / 256);
             yOffset = (256 - Math.Floor((resY / 2 - topMargin) % 256)) % 256;
 
-            int nTopTiles = (int)Math.Ceiling((resY/2 - topMargin + yOffset)/256);
-            int nBotTiles = (int)Math.Ceiling((resY/2 - (256 - topMargin))/256);
+            int nTopTiles = (int)Math.Ceiling((resY / 2 - topMargin + yOffset) / 256);
+            int nBotTiles = (int)Math.Ceiling((resY / 2 - (256 - topMargin)) / 256);
 
             SourceTiles.nTiles verticalTiles = new(centerTileY, nTopTiles, nBotTiles);
 
@@ -110,12 +112,12 @@ namespace MapyCZforTS_CS
 
         public string Get()
         {
-            System.Drawing.Bitmap _outImage = new(ResX, ResY);
+            Bitmap _outImage = new(ResX, ResY);
 
             PrepareImages();
             tilesLoadedEvent.WaitOne();
 
-            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(_outImage))
+            using (Graphics g = Graphics.FromImage(_outImage))
             {
                 for (int y = 0; y < SourceTiles.yTiles.count; y++)
                 {
@@ -125,14 +127,14 @@ namespace MapyCZforTS_CS
                             continue;
 
                         using MemoryStream ms = new(SourceTiles.Data[x, y]);
-                        g.DrawImage(new System.Drawing.Bitmap(ms), new System.Drawing.Point(x * 256 - (int)xOffset, y * 256 - (int)yOffset));
+                        g.DrawImage(new Bitmap(ms), new Point(x * 256 - (int)xOffset, y * 256 - (int)yOffset));
                     }
                 }
             }
 
             Directory.CreateDirectory(OutCache);
-            OutImage = new System.Drawing.Bitmap(_outImage, new System.Drawing.Size(ResX * Scale, ResY * Scale));
-            OutImage.Save(OutFname, System.Drawing.Imaging.ImageFormat.Jpeg);
+            OutImage = new Bitmap(_outImage, new Size(ResX * Scale, ResY * Scale));
+            OutImage.Save(OutFname, ImageFormat.Jpeg);
 
             return OutFname;
         }
