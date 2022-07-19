@@ -5,21 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MapyCZforTS_CS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MapyCZforTS" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0">
-            <MenuItem Header="Soubor">
-                <MenuItem Header="Konec" />
-            </MenuItem>
-            <MenuItem Header="Nastavení">
-                <MenuItem Header="Pokročilý logging" IsCheckable="True" />
-                <MenuItem Header="Změna pracovního adresáře" />
-            </MenuItem>
-            <MenuItem Header="O aplikaci..." />
-        </Menu>
+        <ComboBox x:Name="mapsetInput" HorizontalAlignment="Left" Margin="169,12,0,0" Grid.Row="1" VerticalAlignment="Top" Width="120" RenderTransformOrigin="0.042,-1.273" SelectionChanged="mapsetInput_SelectionChanged"/>
+        <Label x:Name="label" Content="Výběr mapových podkladů:" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top"/>
+        <Label x:Name="label1" Content="Port" HorizontalAlignment="Left" Margin="10,41,0,0" Grid.Row="1" VerticalAlignment="Top"/>
+        <TextBox x:Name="portInput" HorizontalAlignment="Left" Margin="63,45,0,0" Grid.Row="1" TextWrapping="Wrap" Text="5001" VerticalAlignment="Top" Width="120" AllowDrop="False" TextChanged="portInput_TextChanged"/>
+        <CheckBox x:Name="loggingCheckbox" Content="Advanced logging" HorizontalAlignment="Left" Margin="83,142,0,0" Grid.Row="1" VerticalAlignment="Top" Checked="loggingCheckbox_Checked"/>
+        <CheckBox x:Name="cachingCheckbox" Content="Allow caching map tiles" HorizontalAlignment="Left" Margin="344,184,0,0" Grid.Row="1" VerticalAlignment="Top" Checked="cachingCheckbox_Checked"/>
+        <CheckBox x:Name="enableCheckbox" Content="Enable MapyCZforTS" HorizontalAlignment="Left" Margin="335,92,0,0" Grid.Row="1" VerticalAlignment="Top" Checked="enableCheckbox_Checked"/>
     </Grid>
 </Window>
