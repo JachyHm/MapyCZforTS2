@@ -1,5 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using MapyCZforTS_CS.Properties;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -37,7 +37,7 @@ namespace MapyCZforTS_CS
             /// <summary>
             /// Total count of source tiles needed to generate output tile
             /// </summary>
-            public int Count { get => nTilesBefore + 1 + nTilesAfter; }
+            public int Count => nTilesBefore + 1 + nTilesAfter;
 
             /// <summary>
             /// Default constructor
@@ -98,12 +98,12 @@ namespace MapyCZforTS_CS
         public static (int, int) GetPixelFromWGS(double x, double y, byte zoom)
         {
             //This code is a rewriten original JS code from Mapy.cz front-end, I do not have slightest idea what it does
-            uint world_size = (uint)Math.Pow(2, (zoom + 8));
+            uint world_size = (uint)Math.Pow(2, zoom + 8);
 
             double f = Math.Min(Math.Max(Math.Sin(y * Math.PI / 180), -0.9999), 0.9999);
 
             double retX = (x + 180) / 360 * world_size;
-            double retY = (1 - 0.5 * Math.Log((1 + f) / (1 - f)) / Math.PI) / 2 * world_size;
+            double retY = (1 - (0.5 * Math.Log((1 + f) / (1 - f)) / Math.PI)) / 2 * world_size;
 
             return (Convert.ToInt32(retX), Convert.ToInt32(retY));
         }
@@ -111,12 +111,12 @@ namespace MapyCZforTS_CS
         /// <summary>
         /// Source map tiles cache
         /// </summary>
-        public static string SourceCache { get => Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MapyCZforTS", "source_cache"); }
+        public static string SourceCache => Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MapyCZforTS", "source_cache");
 
         /// <summary>
         /// Output map tiles cache
         /// </summary>
-        public static string OutCache { get => Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MapyCZforTS", "output_cache"); }
+        public static string OutCache => Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MapyCZforTS", "output_cache");
 
         /// <summary>
         /// Source tiles data
@@ -131,7 +131,7 @@ namespace MapyCZforTS_CS
         /// <summary>
         /// Desired mapset
         /// </summary>
-        public string Mapset { get; }
+        public Mapset Mapset { get; }
 
         /// <summary>
         /// Total number of completely loaded tiles
@@ -166,7 +166,6 @@ namespace MapyCZforTS_CS
         /// </summary>
         private int Scale { get; }
 
-
         /// <summary>
         /// Output tile absolute filepath
         /// </summary>
@@ -194,25 +193,25 @@ namespace MapyCZforTS_CS
             //X variables
             double leftMargin = pxlX % 256; //calculate pixels from tile left side
             int centerTileX = (int)Math.Ceiling((double)pxlX / 256); //get horizontal tile id
-            xOffset = (256 - Math.Floor((resX / 2 - leftMargin) % 256)) % 256; //calculate horizontal offset in px
+            xOffset = (256 - Math.Floor(((resX / 2) - leftMargin) % 256)) % 256; //calculate horizontal offset in px
 
-            int nLeftTiles = (int)Math.Ceiling((resX / 2 - leftMargin + xOffset) / 256); //number of more tiles needed on left side
-            int nRightTiles = (int)Math.Ceiling((resX / 2 - (256 - leftMargin)) / 256); //number of more tiles needed on right side
+            int nLeftTiles = (int)Math.Ceiling(((resX / 2) - leftMargin + xOffset) / 256); //number of more tiles needed on left side
+            int nRightTiles = (int)Math.Ceiling(((resX / 2) - (256 - leftMargin)) / 256); //number of more tiles needed on right side
 
             SourceTiles.nTiles horizontalTiles = new(centerTileX, nLeftTiles, nRightTiles); //build horizontal nTiles
 
             //Y variables
             double topMargin = pxlY % 256; //calculate pixels from top side
             int centerTileY = (int)Math.Ceiling((double)pxlY / 256); //get vertical tile id
-            yOffset = (256 - Math.Floor((resY / 2 - topMargin) % 256)) % 256; //calculate vertical offset in px
+            yOffset = (256 - Math.Floor(((resY / 2) - topMargin) % 256)) % 256; //calculate vertical offset in px
 
-            int nTopTiles = (int)Math.Ceiling((resY / 2 - topMargin + yOffset) / 256); //number of more tiles needed on upper side
-            int nBotTiles = (int)Math.Ceiling((resY / 2 - (256 - topMargin)) / 256); //number of more tiles needed on bottom side
+            int nTopTiles = (int)Math.Ceiling(((resY / 2) - topMargin + yOffset) / 256); //number of more tiles needed on upper side
+            int nBotTiles = (int)Math.Ceiling(((resY / 2) - (256 - topMargin)) / 256); //number of more tiles needed on bottom side
 
             SourceTiles.nTiles verticalTiles = new(centerTileY, nTopTiles, nBotTiles); //build vertical nTiles
 
             Zoom = zoom;
-            Mapset = App.Mapset;
+            Mapset = App.Mapsets[Settings.Default.Mapset];
             SourceTiles = new SourceTiles(horizontalTiles, verticalTiles);
             OutFname = Path.Join(OutCache, $"{Mapset}_{Zoom}_{string.Format("{0:N6}", wgsX).Replace('.', '_')}-{string.Format("{0:N6}", wgsY).ToString().Replace('.', '_')}.jpg");
 
@@ -227,7 +226,7 @@ namespace MapyCZforTS_CS
         /// <returns>Absolute filepath to map tile.</returns>
         public string Get()
         {
-            if (File.Exists(OutFname) && App.Cache) //check if tile is cached
+            if (File.Exists(OutFname) && Settings.Default.Cache) //check if tile is cached
             {
                 OutImage = new Bitmap(OutFname); //returned cached version
             }
@@ -249,18 +248,15 @@ namespace MapyCZforTS_CS
                                 continue;
 
                             using MemoryStream ms = new(SourceTiles.Data[x, y]);
-                            g.DrawImage(new Bitmap(ms), new Point(x * 256 - (int)xOffset, y * 256 - (int)yOffset));
+                            g.DrawImage(new Bitmap(ms), new Point((x * 256) - (int)xOffset, (y * 256) - (int)yOffset));
                         }
                     }
                 }
 
                 //rescale created image if needed
-                if (Scale != 1)
-                    OutImage = new Bitmap(_outImage, new Size(ResX * Scale, ResY * Scale));
-                else
-                    OutImage = _outImage;
+                OutImage = Scale != 1 ? new Bitmap(_outImage, new Size(ResX * Scale, ResY * Scale)) : _outImage;
 
-                if (!App.Cache)
+                if (!Settings.Default.Cache)
                     return OutFname;
 
                 Directory.CreateDirectory(OutCache);
@@ -279,12 +275,12 @@ namespace MapyCZforTS_CS
         /// <returns>The task object representing the asynchronous operation.</returns>
         private async Task DownloadImage(string fname, string fpath, int x, int y)
         {
-            var response = await App.DownloadClient.GetAsync($"https://mapserver.mapy.cz/{Mapset}/{fname}");
+            HttpResponseMessage response = await App.DownloadClient.GetAsync($"https://mapserver.mapy.cz/{Mapset}/{fname}");
 
             byte[] data = await response.Content.ReadAsByteArrayAsync();
             SourceTiles.Data[x, y] = data;
 
-            if (App.Cache)
+            if (Settings.Default.Cache)
                 await File.WriteAllBytesAsync(fpath, data); //HACK ME: check if we have to wait for file to be saved
         }
 
@@ -293,7 +289,7 @@ namespace MapyCZforTS_CS
         /// </summary>
         private void LoadSourceTiles()
         {
-            if (App.Cache)
+            if (Settings.Default.Cache)
                 Directory.CreateDirectory(SourceCache);
 
             Parallel.For(SourceTiles.xTiles.CenterTile - SourceTiles.xTiles.nTilesBefore, SourceTiles.xTiles.CenterTile + SourceTiles.xTiles.nTilesAfter + 1, (x) =>
@@ -310,7 +306,7 @@ namespace MapyCZforTS_CS
                             int lx = x - SourceTiles.xTiles.CenterTile + SourceTiles.xTiles.nTilesBefore;
                             int ly = y - SourceTiles.yTiles.CenterTile + SourceTiles.yTiles.nTilesBefore;
 
-                            if (File.Exists(fpath) && App.Cache) //try to load cached version if available
+                            if (File.Exists(fpath) && Settings.Default.Cache) //try to load cached version if available
                             {
                                 SourceTiles.Data[lx, ly] = await File.ReadAllBytesAsync(fpath);
                             }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MapyCZforTS_CS.Properties;
+using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -16,6 +18,13 @@ namespace MapyCZforTS_CS
     public class Proxy
     {
         /// <summary>
+        /// ProxyServer instance.
+        /// </summary>
+        private readonly ProxyServer ProxyServer;
+
+        public bool ProxyRunning => ProxyServer.ProxyRunning;
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public Proxy()
@@ -24,24 +33,25 @@ namespace MapyCZforTS_CS
 
             ProxyServer.BeforeRequest += OnRequest; //register callback
 
-            var explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, App.Port, false);
+            ExplicitProxyEndPoint explicitEndPoint = new(IPAddress.Any, Settings.Default.Port, false);
             ProxyServer.AddEndPoint(explicitEndPoint);
         }
 
         /// <summary>
         /// Starts proxy server.
         /// </summary>
-        public void Start() => ProxyServer.Start();
+        public void Start()
+        {
+            ProxyServer.Start();
+        }
 
         /// <summary>
         /// Stops proxy server.
         /// </summary>
-        public void Stop() => ProxyServer.Stop();
-
-        /// <summary>
-        /// ProxyServer instance.
-        /// </summary>
-        private readonly ProxyServer ProxyServer;
+        public void Stop()
+        {
+            ProxyServer.Stop();
+        }
 
         /// <summary>
         /// Generates ProxyServer response with output tile. 
@@ -85,7 +95,7 @@ namespace MapyCZforTS_CS
         /// <param name="query">Input query string</param>
         private static void ParseQuery(SessionEventArgs e, string query)
         {
-            var queryAray = HttpUtility.ParseQueryString(query);
+            NameValueCollection queryAray = HttpUtility.ParseQueryString(query);
             try
             {
                 if (queryAray["center"] == null) //check for tile center coordinates - can't continue unless we know them
