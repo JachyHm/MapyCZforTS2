@@ -24,7 +24,7 @@ namespace MapyCZforTS_CS
         {
             Mapsets.Add(new("Základní", "base-m", 19));
             Mapsets.Add(new("Dopravní", "base-m-traf-down", 19));
-            Mapsets.Add(new("Letecká", "bing", 20));
+            Mapsets.Add(new("Letecká", "ophoto-m", 20));
             Mapsets.Add(new("Letecká 2018", "ophoto1618-m", 20));
             Mapsets.Add(new("Letecká 2015", "ophoto1415-m", 20));
             Mapsets.Add(new("Letecká 2012", "ophoto1012-m", 19));

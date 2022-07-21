@@ -27,7 +27,7 @@ namespace MapyCZforTS_CS
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Proxy()
+        public Proxy(string? externalProxyHostname = null, int externalProxyPort = 0, bool bypassLocalhost = false)
         {
             ProxyServer = new ProxyServer();
 
@@ -35,6 +35,16 @@ namespace MapyCZforTS_CS
 
             ExplicitProxyEndPoint explicitEndPoint = new(IPAddress.Any, Settings.Default.Port, false);
             ProxyServer.AddEndPoint(explicitEndPoint);
+
+            if (externalProxyHostname != null)
+            {
+                IPAddress.TryParse(externalProxyHostname, out IPAddress? externalProxyIP);
+                if (externalProxyHostname.Trim().ToLower() == "localhost" || (externalProxyIP != null && IPAddress.IsLoopback(externalProxyIP)) && externalProxyPort == Settings.Default.Port)
+                    return;
+
+                ProxyServer.UpStreamHttpProxy = new ExternalProxy() { HostName = externalProxyHostname, Port = (int)externalProxyPort, BypassLocalhost = bypassLocalhost};
+                ProxyServer.UpStreamHttpsProxy = new ExternalProxy() { HostName = externalProxyHostname, Port = (int)externalProxyPort, BypassLocalhost = bypassLocalhost };
+            }
         }
 
         /// <summary>
@@ -51,6 +61,21 @@ namespace MapyCZforTS_CS
         public void Stop()
         {
             ProxyServer.Stop();
+        }
+
+        /// <summary>
+        /// Changes port Proxy is listening on.
+        /// </summary>
+        /// <param name="newPort">New port to listen on.</param>
+        public void ChangePort(int newPort)
+        {
+            foreach (var oldEndpoint in ProxyServer.ProxyEndPoints)
+            {
+                ProxyServer.RemoveEndPoint(oldEndpoint);
+            }
+
+            ExplicitProxyEndPoint newEndpoint = new(IPAddress.Any, newPort, false);
+            ProxyServer.AddEndPoint(newEndpoint);
         }
 
         /// <summary>

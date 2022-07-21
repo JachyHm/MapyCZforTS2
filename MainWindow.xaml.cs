@@ -1,4 +1,8 @@
 ﻿using MapyCZforTS_CS.Properties;
+using Microsoft.Win32;
+using System;
+using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -9,7 +13,7 @@ namespace MapyCZforTS_CS
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly Proxy proxy;
+        private Proxy? proxy;
         private readonly bool init = false;
 
         public MainWindow()
@@ -23,28 +27,31 @@ namespace MapyCZforTS_CS
             loggingCheckbox.IsChecked = Settings.Default.AdvancedLogging;
 
             init = true;
-
-            proxy = new();
         }
 
         private void mapsetInput_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Settings.Default.Mapset = mapsetInput.SelectedIndex;
             Settings.Default.Save();
+            Utils.CleanIECache();
         }
 
         private void toogleProxy_Click(object sender, RoutedEventArgs e)
         {
-            if (proxy.ProxyRunning)
+            if (proxy?.ProxyRunning == true)
             {
+                Utils.DisableProxy();
                 proxy.Stop();
+                proxy = null;
                 toogleProxy.Content = "Zapnout proxy";
             }
             else
             {
+                proxy = Utils.EnableProxy();
                 proxy.Start();
                 toogleProxy.Content = "Vypnout proxy";
             }
+            Utils.CleanIECache();
         }
 
         private void loggingCheckbox_Checked(object sender, RoutedEventArgs e)
@@ -69,9 +76,30 @@ namespace MapyCZforTS_CS
         {
             if (init)
             {
-                Settings.Default.Port = (int)portInput.Value;
+                int newPort = (int)portInput.Value;
+                Settings.Default.Port = newPort;
                 Settings.Default.Save();
+
+                if (proxy != null)
+                {
+                    proxy.ChangePort(newPort);
+                    Utils.SetProxyPort(
+                        Registry.CurrentUser.CreateSubKey(Path.Join("Software", "Microsoft", "Windows", "CurrentVersion", "Internet Settings")),
+                        newPort
+                    );
+                }
             }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (proxy?.ProxyRunning == true)
+            {
+                Utils.DisableProxy();
+                proxy.Stop();
+                proxy = null;
+            }
+            base.OnClosing(e);
         }
     }
 }

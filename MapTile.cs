@@ -213,7 +213,7 @@ namespace MapyCZforTS_CS
             Zoom = zoom;
             Mapset = App.Mapsets[Settings.Default.Mapset];
             SourceTiles = new SourceTiles(horizontalTiles, verticalTiles);
-            OutFname = Path.Join(OutCache, $"{Mapset}_{Zoom}_{string.Format("{0:N6}", wgsX).Replace('.', '_')}-{string.Format("{0:N6}", wgsY).ToString().Replace('.', '_')}.jpg");
+            OutFname = Path.Join(OutCache, $"{Mapset.Value}_{Zoom}_{string.Format("{0:N6}", wgsX).Replace('.', '_')}-{string.Format("{0:N6}", wgsY).ToString().Replace('.', '_')}.jpg");
 
             ResX = resX;
             ResY = resY;
@@ -247,8 +247,11 @@ namespace MapyCZforTS_CS
                             if (SourceTiles.Data[x, y] == null)
                                 continue;
 
-                            using MemoryStream ms = new(SourceTiles.Data[x, y]);
-                            g.DrawImage(new Bitmap(ms), new Point((x * 256) - (int)xOffset, (y * 256) - (int)yOffset));
+                            try
+                            {
+                                using MemoryStream ms = new(SourceTiles.Data[x, y]);
+                                g.DrawImage(new Bitmap(ms), new Point((x * 256) - (int)xOffset, (y * 256) - (int)yOffset));
+                            } catch { }
                         }
                     }
                 }
@@ -275,7 +278,7 @@ namespace MapyCZforTS_CS
         /// <returns>The task object representing the asynchronous operation.</returns>
         private async Task DownloadImage(string fname, string fpath, int x, int y)
         {
-            HttpResponseMessage response = await App.DownloadClient.GetAsync($"https://mapserver.mapy.cz/{Mapset}/{fname}");
+            HttpResponseMessage response = await App.DownloadClient.GetAsync($"https://mapserver.mapy.cz/{Mapset.Value}/{fname}");
 
             byte[] data = await response.Content.ReadAsByteArrayAsync();
             SourceTiles.Data[x, y] = data;
@@ -296,8 +299,8 @@ namespace MapyCZforTS_CS
             {
                 Parallel.For(SourceTiles.yTiles.CenterTile - SourceTiles.yTiles.nTilesBefore, SourceTiles.yTiles.CenterTile + SourceTiles.yTiles.nTilesAfter + 1, (y) =>
                 {
-                    string fname = $"{Zoom}-{x}-{y}.jpg";
-                    string fpath = Path.Join(SourceCache, $"{Mapset}_{fname}");
+                    string fname = $"{Zoom}-{x}-{y}";
+                    string fpath = Path.Join(SourceCache, $"{Mapset.Value}_{fname}.jpg");
 
                     Task.Run(async () =>
                     {

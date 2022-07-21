@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Resources;
 using System.Windows;
 
 [assembly: ThemeInfo(
@@ -8,3 +10,8 @@ using System.Windows;
                                               //(used if a resource is not found in the page,
                                               // app, or any theme specific resource dictionaries)
 )]
+
+[assembly: AssemblyDescription("MapyCZ maps for Train Simulator")]
+[assembly: AssemblyCopyright("Copyright © JachyHm 2022")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]

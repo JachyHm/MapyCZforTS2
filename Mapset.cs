@@ -15,7 +15,7 @@
             MaxZoom = maxZoom;
         }
 
-        public Mapset(string name, string value) : this(name, value, byte.MaxValue) { }
+        //public Mapset(string name, string value) : this(name, value, byte.MaxValue) { }
 
         public override string ToString()
         {

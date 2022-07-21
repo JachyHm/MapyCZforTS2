@@ -7,7 +7,8 @@
     <UseWPF>true</UseWPF>
     <StartupObject>MapyCZforTS_CS.App</StartupObject>
     <AssemblyName>MapyCZforTS</AssemblyName>
-    <NeutralLanguage>cs-CZ</NeutralLanguage>
+    <NeutralLanguage>en</NeutralLanguage>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -17,6 +18,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>embedded</DebugType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="favicon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BrotliSharpLib" Version="0.3.3" />
@@ -30,11 +35,32 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Localization\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Localization\Strings.cs.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.cs.resx</DependentUpon>
+    </Compile>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Localization\Strings.cs.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.cs.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

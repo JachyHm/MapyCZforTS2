@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:loc="clr-namespace:MapyCZforTS_CS.Localization"
         xmlns:local="clr-namespace:MapyCZforTS_CS"
         mc:Ignorable="d"
         Title="MapyCZforTS" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight">
@@ -62,28 +63,28 @@
     </Window.Resources>
 
     <TabControl>
-        <TabItem Header="Hlavní">
+        <TabItem Header="{x:Static loc:Strings.MenuMain}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="180" Margin="20">
                 <StackPanel.LayoutTransform>
                     <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
                 </StackPanel.LayoutTransform>
-                <Label Content="Výběr mapových podkladů:" />
+                <Label Content="{x:Static loc:Strings.LabelSelectMapset}" />
                 <ComboBox x:Name="mapsetInput" SelectionChanged="mapsetInput_SelectionChanged" HorizontalAlignment="Stretch" />
-                <Button x:Name="toogleProxy" Content="Zapnout proxy" Margin="0,10" Padding="50,20" Click="toogleProxy_Click" />
+                <Button x:Name="toogleProxy" Content="{x:Static loc:Strings.ButtonEnableProxy}" Margin="0,10" Padding="50,20" Click="toogleProxy_Click" />
             </StackPanel>
         </TabItem>
-        <TabItem Header="Nastavení">
+        <TabItem Header="{x:Static loc:Strings.MenuSettings}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="180" Margin="20">
                 <StackPanel.LayoutTransform>
                     <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
                 </StackPanel.LayoutTransform>
-                <Label Content="Port:" />
+                <Label Content="{x:Static loc:Strings.LabelPort}" />
                 <Slider x:Name="portInput" AllowDrop="False" Minimum="80" Maximum="65535" Value="5001" ValueChanged="portInput_ValueChanged" />
-                <CheckBox x:Name="loggingCheckbox" Content="Rozšířené logování" HorizontalAlignment="Left" Margin="0,10" Checked="loggingCheckbox_Checked" Unchecked="loggingCheckbox_Checked" IsEnabled="False" />
-                <CheckBox x:Name="cachingCheckbox" Content="Ukládat mapová data" HorizontalAlignment="Left" Margin="0" Grid.Row="1" Checked="cachingCheckbox_Checked" Unchecked="cachingCheckbox_Checked" />
+                <CheckBox x:Name="loggingCheckbox" Content="{x:Static loc:Strings.CheckboxAdvancedLogging}" HorizontalAlignment="Left" Margin="0,10" Checked="loggingCheckbox_Checked" Unchecked="loggingCheckbox_Checked" IsEnabled="False" />
+                <CheckBox x:Name="cachingCheckbox" Content="{x:Static loc:Strings.CheckboxCaching}" HorizontalAlignment="Left" Margin="0" Grid.Row="1" Checked="cachingCheckbox_Checked" Unchecked="cachingCheckbox_Checked" />
             </StackPanel>
         </TabItem>
-        <TabItem Header="O aplikaci">
+        <TabItem Header="{x:Static loc:Strings.MenuAbout}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="180" Margin="20">
                 <StackPanel.LayoutTransform>
                     <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
