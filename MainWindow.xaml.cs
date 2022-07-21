@@ -18,6 +18,7 @@ namespace MapyCZforTS_CS
 
         public MainWindow()
         {
+            Utils.Log("Initializing UI", Utils.LOG_LEVEL.VERBOSE);
             InitializeComponent();
 
             App.Mapsets.ForEach(x => mapsetInput.Items.Add(x));
@@ -25,6 +26,7 @@ namespace MapyCZforTS_CS
             portInput.Value = Settings.Default.Port;
             cachingCheckbox.IsChecked = Settings.Default.Cache;
             loggingCheckbox.IsChecked = Settings.Default.AdvancedLogging;
+            Utils.Log($"Loading settings:{Environment.NewLine}\tMapset: {App.Mapsets[Settings.Default.Mapset]}{Environment.NewLine}\tPort: {Settings.Default.Port}{Environment.NewLine}\tUse cache: {Settings.Default.Cache}{Environment.NewLine}\tAdvanced log: {Settings.Default.AdvancedLogging}", Utils.LOG_LEVEL.VERBOSE);
 
             init = true;
         }
@@ -33,6 +35,7 @@ namespace MapyCZforTS_CS
         {
             Settings.Default.Mapset = mapsetInput.SelectedIndex;
             Settings.Default.Save();
+            Utils.Log($"UI -> Changed mapset to {App.Mapsets[Settings.Default.Mapset]}");
             Utils.CleanIECache();
         }
 
@@ -60,6 +63,7 @@ namespace MapyCZforTS_CS
             {
                 Settings.Default.AdvancedLogging = loggingCheckbox.IsChecked == true;
                 Settings.Default.Save();
+                Utils.Log(Settings.Default.AdvancedLogging ? "UI -> Enabled advanced logging" : "UI -> Disabled advanced logging");
             }
         }
 
@@ -69,6 +73,7 @@ namespace MapyCZforTS_CS
             {
                 Settings.Default.Cache = cachingCheckbox.IsChecked == true;
                 Settings.Default.Save();
+                Utils.Log(Settings.Default.Cache ? "UI -> Enabled caching" : "UI -> Disabled caching");
             }
         }
 
@@ -79,6 +84,7 @@ namespace MapyCZforTS_CS
                 int newPort = (int)portInput.Value;
                 Settings.Default.Port = newPort;
                 Settings.Default.Save();
+                Utils.Log($"UI -> Port changed to {newPort}");
 
                 if (proxy != null)
                 {
@@ -95,6 +101,7 @@ namespace MapyCZforTS_CS
         {
             if (proxy?.ProxyRunning == true)
             {
+                Utils.Log("Closing application");
                 Utils.DisableProxy();
                 proxy.Stop();
                 proxy = null;

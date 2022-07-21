@@ -23,17 +23,20 @@ namespace MapyCZforTS_CS
         private readonly ProxyServer ProxyServer;
 
         public bool ProxyRunning => ProxyServer.ProxyRunning;
+        private readonly int Port;
 
         /// <summary>
         /// Default constructor
         /// </summary>
         public Proxy(string? externalProxyHostname = null, int externalProxyPort = 0, bool bypassLocalhost = false)
         {
+            Utils.Log($"PROXY -> ctor:{Environment.NewLine}\texternalProxyHostname: {externalProxyHostname}{Environment.NewLine}\texternalProxyPort: {externalProxyPort}{Environment.NewLine}\tbypassLocalhost: {bypassLocalhost}", Utils.LOG_LEVEL.VERBOSE);
             ProxyServer = new ProxyServer();
 
             ProxyServer.BeforeRequest += OnRequest; //register callback
 
-            ExplicitProxyEndPoint explicitEndPoint = new(IPAddress.Any, Settings.Default.Port, false);
+            Port = Settings.Default.Port;
+            ExplicitProxyEndPoint explicitEndPoint = new(IPAddress.Any, Port, false);
             ProxyServer.AddEndPoint(explicitEndPoint);
 
             if (externalProxyHostname != null)
@@ -42,8 +45,8 @@ namespace MapyCZforTS_CS
                 if (externalProxyHostname.Trim().ToLower() == "localhost" || (externalProxyIP != null && IPAddress.IsLoopback(externalProxyIP)) && externalProxyPort == Settings.Default.Port)
                     return;
 
-                ProxyServer.UpStreamHttpProxy = new ExternalProxy() { HostName = externalProxyHostname, Port = (int)externalProxyPort, BypassLocalhost = bypassLocalhost};
-                ProxyServer.UpStreamHttpsProxy = new ExternalProxy() { HostName = externalProxyHostname, Port = (int)externalProxyPort, BypassLocalhost = bypassLocalhost };
+                ProxyServer.UpStreamHttpProxy = new ExternalProxy() { HostName = externalProxyHostname, Port = externalProxyPort, BypassLocalhost = bypassLocalhost };
+                ProxyServer.UpStreamHttpsProxy = new ExternalProxy() { HostName = externalProxyHostname, Port = externalProxyPort, BypassLocalhost = bypassLocalhost };
             }
         }
 
@@ -52,7 +55,12 @@ namespace MapyCZforTS_CS
         /// </summary>
         public void Start()
         {
-            ProxyServer.Start();
+            Utils.Log($"PROXY -> Starting on port {Port}");
+            try
+            {
+                ProxyServer.Start();
+            }
+            catch (Exception e) { Utils.Log($"PROXY -> Failed to start proxy on port {Port}:{Environment.NewLine}{e}"); }
         }
 
         /// <summary>
@@ -60,7 +68,12 @@ namespace MapyCZforTS_CS
         /// </summary>
         public void Stop()
         {
-            ProxyServer.Stop();
+            Utils.Log($"PROXY -> Stopping proxy");
+            try
+            {
+                ProxyServer.Stop();
+            }
+            catch (Exception e) { Utils.Log($"PROXY -> Failed to stop proxy on port {Port}:{Environment.NewLine}{e}"); }
         }
 
         /// <summary>
@@ -69,13 +82,18 @@ namespace MapyCZforTS_CS
         /// <param name="newPort">New port to listen on.</param>
         public void ChangePort(int newPort)
         {
-            foreach (var oldEndpoint in ProxyServer.ProxyEndPoints)
+            Utils.Log($"PROXY -> Changing proxy port at runtime");
+            try
             {
-                ProxyServer.RemoveEndPoint(oldEndpoint);
-            }
+                foreach (var oldEndpoint in ProxyServer.ProxyEndPoints)
+                {
+                    ProxyServer.RemoveEndPoint(oldEndpoint);
+                }
 
-            ExplicitProxyEndPoint newEndpoint = new(IPAddress.Any, newPort, false);
-            ProxyServer.AddEndPoint(newEndpoint);
+                ExplicitProxyEndPoint newEndpoint = new(IPAddress.Any, newPort, false);
+                ProxyServer.AddEndPoint(newEndpoint);
+            }
+            catch (Exception e) { Utils.Log($"PROXY -> Failed to change proxy port to {newPort}:{Environment.NewLine}{e}"); }
         }
 
         /// <summary>
@@ -110,6 +128,7 @@ namespace MapyCZforTS_CS
             response.Headers.AddHeader(new HttpHeader("Access-Control-Allow-Origin", "*"));
             response.Headers.AddHeader(new HttpHeader("X-XSS-Protection", "1; mode=block"));
             response.Headers.AddHeader(new HttpHeader("X-Frame-Options", "SAMEORIGIN"));
+            Utils.Log($"PROXY -> Response to {e.ClientConnectionId} succesfully sent", Utils.LOG_LEVEL.VERBOSE);
             e.Respond(response);
         }
 
@@ -120,6 +139,7 @@ namespace MapyCZforTS_CS
         /// <param name="query">Input query string</param>
         private static void ParseQuery(SessionEventArgs e, string query)
         {
+            Utils.Log($"PROXY -> Parsing query {query}", Utils.LOG_LEVEL.VERBOSE);
             NameValueCollection queryAray = HttpUtility.ParseQueryString(query);
             try
             {
@@ -139,27 +159,25 @@ namespace MapyCZforTS_CS
 
 
                 //try parse resolution, fallback to 1024x1024 px
-                int resX = 1024, resY = 1024;
 
                 string[] resolution = queryAray["size"]!.Split("x");
-                int.TryParse(resolution[0], out resX);
-                int.TryParse(resolution[1], out resY);
+                int.TryParse(resolution[0], out int resX);
+                int.TryParse(resolution[1], out int resY);
 
 
                 //try parse rescale value, no rescale if failed
-                int scale = 1;
-                int.TryParse(queryAray["scale"], out scale);
+                int.TryParse(queryAray["scale"], out int scale);
 
 
                 //try parse zoom level, 19 default
-                byte zoom = 19;
-                byte.TryParse(queryAray["zoom"], out zoom);
+                byte.TryParse(queryAray["zoom"], out byte zoom);
 
+                Utils.Log($"PROXY -> Query OK, generating response", Utils.LOG_LEVEL.VERBOSE);
                 MakeResponse(e, wgsX, wgsY, resX, resY, scale, zoom);
             }
             catch (Exception ex)
             {
-                Utils.Log(ex);
+                Utils.Log($"PROXY -> Failed to parse query {query}:{Environment.NewLine}{ex}");
                 throw;
             }
         }
@@ -178,16 +196,19 @@ namespace MapyCZforTS_CS
             {
                 if (method == "GET") //if method is GET, parse directly the query string
                 {
+                    Utils.Log($"PROXY -> Received GET request {requestUri}", Utils.LOG_LEVEL.VERBOSE);
                     ParseQuery(e, requestUri.Query);
                 }
                 else if (method == "POST")
                 {
                     if (e.HttpClient.Request.ContentType?.Contains("x-www-form", StringComparison.OrdinalIgnoreCase) == true) //if method is POST, parse received body content
                     {
+                        Utils.Log($"PROXY -> Received POST www-form request {requestUri}", Utils.LOG_LEVEL.VERBOSE);
                         ParseQuery(e, await e.GetRequestBodyAsString());
                     }
                     else if (e.HttpClient.Request.ContentType == null) //if method is POST, but does not contain body encoded data, fail request
                     {
+                        Utils.Log($"PROXY -> Received unknown type POST request {requestUri}", Utils.LOG_LEVEL.VERBOSE);
                         Response response = new()
                         {
                             StatusCode = 400,

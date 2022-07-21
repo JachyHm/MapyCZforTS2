@@ -22,6 +22,7 @@ namespace MapyCZforTS_CS
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            Utils.Log("Application start");
             Mapsets.Add(new("Základní", "base-m", 19));
             Mapsets.Add(new("Dopravní", "base-m-traf-down", 19));
             Mapsets.Add(new("Letecká", "ophoto-m", 20));

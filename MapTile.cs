@@ -191,7 +191,7 @@ namespace MapyCZforTS_CS
             (int pxlX, int pxlY) = GetPixelFromWGS(wgsX, wgsY, zoom); //gets pixel coords
 
             //X variables
-            double leftMargin = pxlX % 256; //calculate pixels from tile left side
+            double leftMargin = -(256 - (pxlX % 256)); //calculate pixels from tile left side
             int centerTileX = (int)Math.Ceiling((double)pxlX / 256); //get horizontal tile id
             xOffset = (256 - Math.Floor(((resX / 2) - leftMargin) % 256)) % 256; //calculate horizontal offset in px
 
@@ -201,7 +201,7 @@ namespace MapyCZforTS_CS
             SourceTiles.nTiles horizontalTiles = new(centerTileX, nLeftTiles, nRightTiles); //build horizontal nTiles
 
             //Y variables
-            double topMargin = pxlY % 256; //calculate pixels from top side
+            double topMargin = -(256 - (pxlY % 256)); //calculate pixels from top side
             int centerTileY = (int)Math.Ceiling((double)pxlY / 256); //get vertical tile id
             yOffset = (256 - Math.Floor(((resY / 2) - topMargin) % 256)) % 256; //calculate vertical offset in px
 
@@ -218,6 +218,8 @@ namespace MapyCZforTS_CS
             ResX = resX;
             ResY = resY;
             Scale = scale;
+
+            Utils.Log($"TILE -> Creating tile {OutFname}", Utils.LOG_LEVEL.VERBOSE);
         }
 
         /// <summary>
@@ -229,13 +231,16 @@ namespace MapyCZforTS_CS
             if (File.Exists(OutFname) && Settings.Default.Cache) //check if tile is cached
             {
                 OutImage = new Bitmap(OutFname); //returned cached version
+                Utils.Log($"TILE -> Found cached image for {OutFname}", Utils.LOG_LEVEL.VERBOSE);
             }
             else
             {
+                Utils.Log($"TILE -> Generating new image {OutFname}", Utils.LOG_LEVEL.VERBOSE);
                 Bitmap _outImage = new(ResX, ResY); //create new image
 
                 LoadSourceTiles(); //(down)load source tiles
                 tilesLoadedEvent.WaitOne(); //wait until all source tiles are ready
+                Utils.Log("TILE -> All required source tiles fetched", Utils.LOG_LEVEL.VERBOSE);
 
                 //paste each tile inside newly created image
                 using (Graphics g = Graphics.FromImage(_outImage))
@@ -250,18 +255,23 @@ namespace MapyCZforTS_CS
                             try
                             {
                                 using MemoryStream ms = new(SourceTiles.Data[x, y]);
-                                g.DrawImage(new Bitmap(ms), new Point((x * 256) - (int)xOffset, (y * 256) - (int)yOffset));
-                            } catch { }
+                                g.DrawImage(new Bitmap(ms), new Rectangle((x * 256) - (int)xOffset, (y * 256) - (int)yOffset, 256, 256));
+                            }
+                            catch { }
                         }
                     }
                 }
+                Utils.Log($"TILE -> Image {OutFname} succesfully generated", Utils.LOG_LEVEL.VERBOSE);
 
                 //rescale created image if needed
                 OutImage = Scale != 1 ? new Bitmap(_outImage, new Size(ResX * Scale, ResY * Scale)) : _outImage;
+                if (Scale != 1)
+                    Utils.Log($"TILE -> Rescaling generated image by {Scale}", Utils.LOG_LEVEL.VERBOSE);
 
                 if (!Settings.Default.Cache)
                     return OutFname;
 
+                Utils.Log($"TILE -> Flushing image to file", Utils.LOG_LEVEL.VERBOSE);
                 Directory.CreateDirectory(OutCache);
                 OutImage.Save(OutFname, ImageFormat.Jpeg);
             }
@@ -278,7 +288,11 @@ namespace MapyCZforTS_CS
         /// <returns>The task object representing the asynchronous operation.</returns>
         private async Task DownloadImage(string fname, string fpath, int x, int y)
         {
-            HttpResponseMessage response = await App.DownloadClient.GetAsync($"https://mapserver.mapy.cz/{Mapset.Value}/{fname}");
+            string requestUrl = $"https://mapserver.mapy.cz/{Mapset.Value}/{fname}";
+            HttpResponseMessage response = await App.DownloadClient.GetAsync(requestUrl);
+
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                Utils.Log($"FETCH -> Failed to download image {requestUrl}", Utils.LOG_LEVEL.VERBOSE);
 
             byte[] data = await response.Content.ReadAsByteArrayAsync();
             SourceTiles.Data[x, y] = data;
@@ -292,8 +306,17 @@ namespace MapyCZforTS_CS
         /// </summary>
         private void LoadSourceTiles()
         {
-            if (Settings.Default.Cache)
-                Directory.CreateDirectory(SourceCache);
+            try
+            {
+                if (Settings.Default.Cache)
+                    Directory.CreateDirectory(SourceCache);
+            }
+            catch (Exception e)
+            {
+                Settings.Default.Cache = false;
+                Settings.Default.Save();
+                Utils.Log($"FETCH -> Failed to create cache directory:{Environment.NewLine}{e}");
+            }
 
             Parallel.For(SourceTiles.xTiles.CenterTile - SourceTiles.xTiles.nTilesBefore, SourceTiles.xTiles.CenterTile + SourceTiles.xTiles.nTilesAfter + 1, (x) =>
             {
@@ -318,7 +341,7 @@ namespace MapyCZforTS_CS
                                 await DownloadImage(fname, fpath, lx, ly);
                             }
                         }
-                        catch { }
+                        catch (Exception e) { Utils.Log($"FETCH -> Failed to fetch source tile {Mapset.Value}_{fname}: {e}"); }
 
                         lock (tilesLoadedEvent)
                         {

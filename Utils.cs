@@ -1,40 +1,54 @@
 ﻿using MapyCZforTS_CS.Properties;
 using Microsoft.Win32;
 using System;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using Titanium.Web.Proxy;
-using System.Runtime.InteropServices;
 
 namespace MapyCZforTS_CS
 {
+
     internal class Utils
     {
-        /// <summary>
-        /// Logs exception.
-        /// </summary>
-        /// <param name="e">Exception to log.</param>
-        /// <param name="level">Message level (0 - DEFAULT, 1 - VERBOSE)</param>
-        public static void Log(Exception e, byte level = 0)
+        public enum LOG_LEVEL
         {
-            Log(e.Message, level);
+            ERROR,
+            VERBOSE
         }
 
         /// <summary>
         /// Logs message.
         /// </summary>
         /// <param name="message">Message to log.</param>
-        /// <param name="level">Message level (0 - DEFAULT, 1 - VERBOSE)</param>
-        public static void Log(string message, byte level = 0)
+        /// <param name="level">Message level (0 - ERROR, 1 - VERBOSE)</param>
+        public static void Log(string message, LOG_LEVEL level = LOG_LEVEL.ERROR)
         {
-            //TODO: implement logging
+            if (level > LogLevel)
+                return;
+
+            try
+            {
+                DateTime dateTime = DateTime.Now;
+                if (LogFile == null)
+                    LogFile = new(Path.Join(Path.GetTempPath(), $"MapyCZforTS_{dateTime:yyyyMMdd_HHmmss}.log"), false);
+
+                LogFile.WriteLine($"{dateTime:O}: {message}");
+                LogFile.Flush();
+            }
+            catch { }
         }
+
+        private static LOG_LEVEL LogLevel { get => (Settings.Default.AdvancedLogging ? LOG_LEVEL.VERBOSE : LOG_LEVEL.ERROR); }
+
+        private static StreamWriter? LogFile { get; set; }
 
         private const string CACHED_TILE_PATTERN = "*staticmap*";
 
         public static void DeleteCachedTiles(DirectoryInfo cacheDir)
         {
+            Utils.Log($"CACHE -> Deleting cached tiles in {cacheDir}", LOG_LEVEL.VERBOSE);
             foreach (var cachedTile in cacheDir.GetFiles(CACHED_TILE_PATTERN, SearchOption.AllDirectories))
             {
                 try
@@ -47,26 +61,27 @@ namespace MapyCZforTS_CS
 
         public static void CleanIECache()
         {
-                string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-                try
+            try
+            {
+                var newCache = new DirectoryInfo(Path.Join(appdata, "Microsoft", "Windows", "INetCache", "IE"));
+                if (newCache.Exists)
                 {
-                    var newCache = new DirectoryInfo(Path.Join(appdata, "Microsoft", "Windows", "INetCache", "IE"));
-                    if (newCache.Exists)
-                    {
-                        DeleteCachedTiles(newCache);
-                    }
-                } catch { }
-
-                try
-                {
-                    var oldCache = new DirectoryInfo(Path.Join(appdata, "Microsoft", "Windows", "Temporary Internet Files", "Content.IE5"));
-                    if (oldCache.Exists)
-                    {
-                        DeleteCachedTiles(oldCache);
-                    }
+                    DeleteCachedTiles(newCache);
                 }
-                catch { }
+            }
+            catch { }
+
+            try
+            {
+                var oldCache = new DirectoryInfo(Path.Join(appdata, "Microsoft", "Windows", "Temporary Internet Files", "Content.IE5"));
+                if (oldCache.Exists)
+                {
+                    DeleteCachedTiles(oldCache);
+                }
+            }
+            catch { }
         }
 
         private static string? OldProxyHost;
@@ -76,6 +91,7 @@ namespace MapyCZforTS_CS
 
         public static void DisableProxy()
         {
+            Utils.Log("PROXY -> Restoring default proxy settings", LOG_LEVEL.VERBOSE);
             try
             {
                 var hreg = Registry.CurrentUser.CreateSubKey(Path.Join("Software", "Microsoft", "Windows", "CurrentVersion", "Internet Settings"), true);
@@ -98,12 +114,14 @@ namespace MapyCZforTS_CS
 
                     hreg.SetValue("ProxyEnable", OldProxyEnabled);
                 }
-            } catch
+            }
+            catch (Exception e)
             {
+                Utils.Log($"PROXY -> Failed to restore default proxy settings:{Environment.NewLine}{e}");
                 string host = string.Empty, port = string.Empty;
                 if (OldProxyHost != null)
                 {
-                    Uri uri = new Uri(OldProxyHost);
+                    Uri uri = new(OldProxyHost);
                     host = uri.Host;
                     port = uri.Port.ToString();
                 }
@@ -113,7 +131,8 @@ namespace MapyCZforTS_CS
                 if (OldProxyBypass != null)
                 {
                     bypasses = string.Join(';', OldProxyBypass.Split(';').Where(
-                        x => {
+                        x =>
+                        {
                             if (x.ToLower() != "<local>")
                                 return true;
 
@@ -123,7 +142,8 @@ namespace MapyCZforTS_CS
                     ));
                 }
                 MessageBox.Show(string.Format(Localization.Strings.ContentRestoreProxy, host, port, bypasses, excludeLocalhost), Localization.Strings.TitleRestoreProxy, MessageBoxButton.OK, MessageBoxImage.Warning);
-            } finally
+            }
+            finally
             {
                 OldProxyHost = null;
                 OldProxyBypass = null;
@@ -135,6 +155,7 @@ namespace MapyCZforTS_CS
 
         public static Proxy EnableProxy()
         {
+            Utils.Log("PROXY -> Applying custom proxy settings", LOG_LEVEL.VERBOSE);
             try
             {
                 var hreg = Registry.CurrentUser.CreateSubKey(Path.Join("Software", "Microsoft", "Windows", "CurrentVersion", "Internet Settings"), true);
@@ -155,8 +176,10 @@ namespace MapyCZforTS_CS
                         hreg.DeleteValue("ProxyOverride", false);
                         hreg.DeleteValue("AutoConfigURL", false);
                         ProxyServer p = new();
-                    } catch
+                    }
+                    catch (Exception e)
                     {
+                        Utils.Log($"PROXY -> Failed to set registry values:{Environment.NewLine}{e}");
                         MessageBox.Show(string.Format(Localization.Strings.ContentSetProxy, Settings.Default.Port), Localization.Strings.TitleSetProxy, MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
 
@@ -184,8 +207,10 @@ namespace MapyCZforTS_CS
                         }
                     }
                 }
-            } catch
+            }
+            catch (Exception e)
             {
+                Utils.Log($"PROXY -> Failed to set custom proxy settings:{Environment.NewLine}{e}");
             }
 
             RefreshProxy();
@@ -194,8 +219,13 @@ namespace MapyCZforTS_CS
 
         private static void RefreshProxy()
         {
-            InternetSetOption(IntPtr.Zero, 39, IntPtr.Zero, 0);
-            InternetSetOption(IntPtr.Zero, 37, IntPtr.Zero, 0);
+            Utils.Log("PROXY -> Applying networking changes", LOG_LEVEL.VERBOSE);
+            try
+            {
+                InternetSetOption(IntPtr.Zero, 39, IntPtr.Zero, 0);
+                InternetSetOption(IntPtr.Zero, 37, IntPtr.Zero, 0);
+            }
+            catch (Exception e) { Utils.Log($"PROXY -> Failed to apply networking changes:{Environment.NewLine}{e}"); }
         }
 
         [DllImport("wininet.dll")]
