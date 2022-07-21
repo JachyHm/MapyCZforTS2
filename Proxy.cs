@@ -1,6 +1,7 @@
 ﻿using MapyCZforTS_CS.Properties;
 using System;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -151,10 +152,10 @@ namespace MapyCZforTS_CS
 
                 //try parse center coordinates, throw exception if failed
                 string[] center = queryAray["center"]!.Split(",");
-                if (!double.TryParse(center[0], out double wgsY))
+                if (!double.TryParse(center[0], NumberStyles.Number, CultureInfo.InvariantCulture, out double wgsY))
                     throw new FormatException("Invalid format of Y coordinate!");
 
-                if (!double.TryParse(center[1], out double wgsX))
+                if (!double.TryParse(center[1], NumberStyles.Number, CultureInfo.InvariantCulture, out double wgsX))
                     throw new FormatException("Invalid format of X coordinate!");
 
 
