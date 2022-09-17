@@ -82,16 +82,18 @@ namespace MapyCZforTS_CS
             if (!File.Exists(Utils.LogPath))
                 return;
 
-            System.Diagnostics.Process.Start(Utils.LogPath);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Utils.LogPath) { UseShellExecute = true });
         }
 
         private void clearCache_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                Utils.Log($"CACHE -> Deleting local image cache per user request");
                 Directory.Delete(MapTile.SourceCache, true);
                 Directory.Delete(MapTile.OutCache, true);
-            } 
+                Utils.Log($"CACHE -> Succesfully deleted local image cache per user request");
+            }
             catch (Exception ex)
             {
                 Utils.Log($"CACHE -> Failed to delete local cache: {ex}", Utils.LOG_LEVEL.ERROR);
