@@ -18,6 +18,15 @@ namespace MapyCZforTS_CS
 
         public MainWindow()
         {
+            AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
+            {
+                _onClosing();
+                if (e.ExceptionObject is not Exception ex)
+                    return;
+
+                Utils.Log($"Unhandled exception occured in {ex.Source}: {ex.StackTrace}!");
+            };
+
             Utils.Log("Initializing UI", Utils.LOG_LEVEL.VERBOSE);
             InitializeComponent();
 
@@ -100,7 +109,7 @@ namespace MapyCZforTS_CS
             }
         }
 
-        protected override void OnClosing(CancelEventArgs e)
+        private void _onClosing()
         {
             if (proxy?.ProxyRunning == true)
             {
@@ -109,6 +118,11 @@ namespace MapyCZforTS_CS
                 proxy.Stop();
                 proxy = null;
             }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            _onClosing();
             base.OnClosing(e);
         }
     }
