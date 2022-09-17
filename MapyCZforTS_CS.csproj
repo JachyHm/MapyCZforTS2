@@ -9,6 +9,9 @@
     <AssemblyName>MapyCZforTS</AssemblyName>
     <NeutralLanguage>en</NeutralLanguage>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <PackageIcon>favicon.ico</PackageIcon>
+    <PackageProjectUrl>rw.jachyhm.cz</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JachyHm/MapyCZforTS</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -64,6 +67,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="favicon.ico">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

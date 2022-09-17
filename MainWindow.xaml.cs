@@ -90,8 +90,10 @@ namespace MapyCZforTS_CS
             try
             {
                 Utils.Log($"CACHE -> Deleting local image cache per user request");
-                Directory.Delete(MapTile.SourceCache, true);
-                Directory.Delete(MapTile.OutCache, true);
+                if (Directory.Exists(MapTile.SourceCache))
+                    Directory.Delete(MapTile.SourceCache, true);
+                if (Directory.Exists(MapTile.OutCache))
+                    Directory.Delete(MapTile.OutCache, true);
                 Utils.Log($"CACHE -> Succesfully deleted local image cache per user request");
             }
             catch (Exception ex)
