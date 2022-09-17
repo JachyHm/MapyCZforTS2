@@ -121,7 +121,7 @@
     <value>Enable proxy</value>
   </data>
   <data name="CheckboxAdvancedLogging" xml:space="preserve">
-    <value>Advanced logging:</value>
+    <value>Advanced logging</value>
   </data>
   <data name="CheckboxCaching" xml:space="preserve">
     <value>Enable caching of map tiles</value>
@@ -152,6 +152,45 @@
   </data>
   <data name="LabelSelectMapset" xml:space="preserve">
     <value>Mapsets selection:</value>
+  </data>
+  <data name="MapTypeBase" xml:space="preserve">
+    <value>Base</value>
+  </data>
+  <data name="MapTypeGeo" xml:space="preserve">
+    <value>Geographic</value>
+  </data>
+  <data name="MapTypeHist" xml:space="preserve">
+    <value>Historical 1836-1852</value>
+  </data>
+  <data name="MapTypeOrto" xml:space="preserve">
+    <value>Aerial</value>
+  </data>
+  <data name="MapTypeOrto2003" xml:space="preserve">
+    <value>Aerial 2003</value>
+  </data>
+  <data name="MapTypeOrto2006" xml:space="preserve">
+    <value>Aerial 2006</value>
+  </data>
+  <data name="MapTypeOrto2012" xml:space="preserve">
+    <value>Aerial 2012</value>
+  </data>
+  <data name="MapTypeOrto2015" xml:space="preserve">
+    <value>Aerial 2015</value>
+  </data>
+  <data name="MapTypeOrto2018" xml:space="preserve">
+    <value>Aerial 2018</value>
+  </data>
+  <data name="MapTypeRelief" xml:space="preserve">
+    <value>Relief</value>
+  </data>
+  <data name="MapTypeTourist" xml:space="preserve">
+    <value>Tourist</value>
+  </data>
+  <data name="MapTypeTransport" xml:space="preserve">
+    <value>Transport</value>
+  </data>
+  <data name="MapTypeWinter" xml:space="preserve">
+    <value>Winter</value>
   </data>
   <data name="MaxZoom" xml:space="preserve">
     <value>Max available zoom: {0}

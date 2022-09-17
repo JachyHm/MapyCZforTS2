@@ -43,7 +43,8 @@ namespace MapyCZforTS_CS
 
         private void mapsetInput_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            byte maxZoom = App.Mapsets[Settings.Default.Mapset].MaxZoom;
+            byte mapset = (byte)mapsetInput.SelectedIndex;
+            byte maxZoom = App.Mapsets[mapset].MaxZoom;
             byte posNum = (byte)(maxZoom > 16 ? 22 - maxZoom : maxZoom - 12);
             string posSide = maxZoom > 16 ? Localization.Strings.FromRight : Localization.Strings.FromLeft;
 
@@ -52,9 +53,9 @@ namespace MapyCZforTS_CS
             if (!init)
                 return;
 
-            Settings.Default.Mapset = mapsetInput.SelectedIndex;
+            Settings.Default.Mapset = mapset;
             Settings.Default.Save();
-            Utils.Log($"UI -> Changed mapset to {App.Mapsets[Settings.Default.Mapset]}");
+            Utils.Log($"UI -> Changed mapset to {App.Mapsets[mapset]}");
 
             Utils.CleanIECache();
         }

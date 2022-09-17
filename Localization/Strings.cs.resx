@@ -153,6 +153,45 @@
   <data name="LabelSelectMapset" xml:space="preserve">
     <value>Výběr mapových podkladů:</value>
   </data>
+  <data name="MapTypeBase" xml:space="preserve">
+    <value>Základní</value>
+  </data>
+  <data name="MapTypeGeo" xml:space="preserve">
+    <value>Zeměpisná</value>
+  </data>
+  <data name="MapTypeHist" xml:space="preserve">
+    <value>Historická 1836-1852</value>
+  </data>
+  <data name="MapTypeOrto" xml:space="preserve">
+    <value>Letecká</value>
+  </data>
+  <data name="MapTypeOrto2003" xml:space="preserve">
+    <value>Letecká 2003</value>
+  </data>
+  <data name="MapTypeOrto2006" xml:space="preserve">
+    <value>Letecká 2006</value>
+  </data>
+  <data name="MapTypeOrto2012" xml:space="preserve">
+    <value>Letecká 2012</value>
+  </data>
+  <data name="MapTypeOrto2015" xml:space="preserve">
+    <value>Letecká 2015</value>
+  </data>
+  <data name="MapTypeOrto2018" xml:space="preserve">
+    <value>Letecká 2018</value>
+  </data>
+  <data name="MapTypeRelief" xml:space="preserve">
+    <value>Reliéfní</value>
+  </data>
+  <data name="MapTypeTourist" xml:space="preserve">
+    <value>Turistická</value>
+  </data>
+  <data name="MapTypeTransport" xml:space="preserve">
+    <value>Dopravní</value>
+  </data>
+  <data name="MapTypeWinter" xml:space="preserve">
+    <value>Zimní</value>
+  </data>
   <data name="MaxZoom" xml:space="preserve">
     <value>Maximální zoom: {0}
 ({1}. pozice posuvníku {2})</value>

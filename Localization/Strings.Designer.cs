@@ -70,7 +70,7 @@ namespace MapyCZforTS_CS.Localization {
         }
         
         /// <summary>
-        ///   Vyhledá lokalizovaný řetězec podobný Advanced logging:.
+        ///   Vyhledá lokalizovaný řetězec podobný Advanced logging.
         /// </summary>
         public static string CheckboxAdvancedLogging {
             get {
@@ -165,6 +165,123 @@ namespace MapyCZforTS_CS.Localization {
         public static string LabelSelectMapset {
             get {
                 return ResourceManager.GetString("LabelSelectMapset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Base.
+        /// </summary>
+        public static string MapTypeBase {
+            get {
+                return ResourceManager.GetString("MapTypeBase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Geographic.
+        /// </summary>
+        public static string MapTypeGeo {
+            get {
+                return ResourceManager.GetString("MapTypeGeo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Historical 1836-1852.
+        /// </summary>
+        public static string MapTypeHist {
+            get {
+                return ResourceManager.GetString("MapTypeHist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Aerial.
+        /// </summary>
+        public static string MapTypeOrto {
+            get {
+                return ResourceManager.GetString("MapTypeOrto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Aerial 2003.
+        /// </summary>
+        public static string MapTypeOrto2003 {
+            get {
+                return ResourceManager.GetString("MapTypeOrto2003", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Aerial 2006.
+        /// </summary>
+        public static string MapTypeOrto2006 {
+            get {
+                return ResourceManager.GetString("MapTypeOrto2006", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Aerial 2012.
+        /// </summary>
+        public static string MapTypeOrto2012 {
+            get {
+                return ResourceManager.GetString("MapTypeOrto2012", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Aerial 2015.
+        /// </summary>
+        public static string MapTypeOrto2015 {
+            get {
+                return ResourceManager.GetString("MapTypeOrto2015", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Aerial 2018.
+        /// </summary>
+        public static string MapTypeOrto2018 {
+            get {
+                return ResourceManager.GetString("MapTypeOrto2018", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Relief.
+        /// </summary>
+        public static string MapTypeRelief {
+            get {
+                return ResourceManager.GetString("MapTypeRelief", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Tourist.
+        /// </summary>
+        public static string MapTypeTourist {
+            get {
+                return ResourceManager.GetString("MapTypeTourist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Transport.
+        /// </summary>
+        public static string MapTypeTransport {
+            get {
+                return ResourceManager.GetString("MapTypeTransport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Winter.
+        /// </summary>
+        public static string MapTypeWinter {
+            get {
+                return ResourceManager.GetString("MapTypeWinter", resourceCulture);
             }
         }
         

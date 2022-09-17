@@ -25,19 +25,19 @@ namespace MapyCZforTS_CS
         protected override void OnStartup(StartupEventArgs e)
         {
             Utils.Log("Application start");
-            Mapsets.Add(new("Základní", "base-m", 19));
-            Mapsets.Add(new("Dopravní", "base-m-traf-down", 19));
-            Mapsets.Add(new("Letecká", "ophoto-m", 20));
-            Mapsets.Add(new("Letecká 2018", "ophoto1618-m", 20));
-            Mapsets.Add(new("Letecká 2015", "ophoto1415-m", 20));
-            Mapsets.Add(new("Letecká 2012", "ophoto1012-m", 19));
-            Mapsets.Add(new("Letecká 2006", "ophoto0406-m", 19));
-            Mapsets.Add(new("Letecká 2003", "ophoto0203-m", 18));
-            Mapsets.Add(new("Turistická", "turist-m", 19));
-            Mapsets.Add(new("Zeměpisná", "zemepis-m", 18));
-            Mapsets.Add(new("Zimní", "winter-m-down", 19));
-            Mapsets.Add(new("Historická 1836-1852", "army2-m", 15));
-            Mapsets.Add(new("Reliéfní", "relief-m", 15));
+            Mapsets.Add(new(Localization.Strings.MapTypeBase, "base-m", 19));
+            Mapsets.Add(new(Localization.Strings.MapTypeTransport, "base-m-traf-down", 19));
+            Mapsets.Add(new(Localization.Strings.MapTypeOrto, "ophoto-m", 20));
+            Mapsets.Add(new(Localization.Strings.MapTypeOrto2018, "ophoto1618-m", 20));
+            Mapsets.Add(new(Localization.Strings.MapTypeOrto2015, "ophoto1415-m", 20));
+            Mapsets.Add(new(Localization.Strings.MapTypeOrto2012, "ophoto1012-m", 19));
+            Mapsets.Add(new(Localization.Strings.MapTypeOrto2006, "ophoto0406-m", 19));
+            Mapsets.Add(new(Localization.Strings.MapTypeOrto2003, "ophoto0203-m", 18));
+            Mapsets.Add(new(Localization.Strings.MapTypeTourist, "turist-m", 19));
+            Mapsets.Add(new(Localization.Strings.MapTypeGeo, "zemepis-m", 18));
+            Mapsets.Add(new(Localization.Strings.MapTypeWinter, "winter-m-down", 19));
+            Mapsets.Add(new(Localization.Strings.MapTypeHist, "army2-m", 15));
+            Mapsets.Add(new(Localization.Strings.MapTypeRelief, "relief-m", 15));
 
             if (Settings.Default.UpgradeRequired)
             {
