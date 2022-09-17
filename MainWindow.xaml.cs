@@ -20,15 +20,16 @@ namespace MapyCZforTS_CS
         {
             AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
             {
-                _onClosing();
-                if (e.ExceptionObject is not Exception ex)
-                    return;
+                if (e.ExceptionObject is Exception ex)
+                    Utils.Log($"Unhandled exception occured:{Environment.NewLine}{ex.StackTrace}", Utils.LOG_LEVEL.ERROR);
 
-                Utils.Log($"Unhandled exception occured in {ex.Source}: {ex.StackTrace}!");
+                _onClosing();
             };
 
             Utils.Log("Initializing UI", Utils.LOG_LEVEL.VERBOSE);
             InitializeComponent();
+
+            App.MW = this;
 
             App.Mapsets.ForEach(x => mapsetInput.Items.Add(x));
             mapsetInput.SelectedIndex = Settings.Default.Mapset;
@@ -42,11 +43,18 @@ namespace MapyCZforTS_CS
 
         private void mapsetInput_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            byte maxZoom = App.Mapsets[Settings.Default.Mapset].MaxZoom;
+            byte posNum = (byte)(maxZoom > 16 ? 22 - maxZoom : maxZoom - 12);
+            string posSide = maxZoom > 16 ? Localization.Strings.FromRight : Localization.Strings.FromLeft;
+
+            MaxZoomText.Text = string.Format(Localization.Strings.MaxZoom, maxZoom, posNum, posSide);
+
+            if (!init)
+                return;
+
             Settings.Default.Mapset = mapsetInput.SelectedIndex;
             Settings.Default.Save();
             Utils.Log($"UI -> Changed mapset to {App.Mapsets[Settings.Default.Mapset]}");
-
-            MaxZoomText.Text = App.Mapsets[Settings.Default.Mapset].MaxZoom.ToString();
 
             Utils.CleanIECache();
         }
@@ -67,6 +75,27 @@ namespace MapyCZforTS_CS
                 toogleProxy.Content = "Vypnout proxy";
             }
             Utils.CleanIECache();
+        }
+
+        private void openLog_Click(object sender, RoutedEventArgs e)
+        {
+            if (!File.Exists(Utils.LogPath))
+                return;
+
+            System.Diagnostics.Process.Start(Utils.LogPath);
+        }
+
+        private void clearCache_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Directory.Delete(MapTile.SourceCache, true);
+                Directory.Delete(MapTile.OutCache, true);
+            } 
+            catch (Exception ex)
+            {
+                Utils.Log($"CACHE -> Failed to delete local cache: {ex}", Utils.LOG_LEVEL.ERROR);
+            }
         }
 
         private void loggingCheckbox_Checked(object sender, RoutedEventArgs e)

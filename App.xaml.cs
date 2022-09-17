@@ -20,6 +20,8 @@ namespace MapyCZforTS_CS
         /// </summary>
         public static HttpClient DownloadClient { get; set; } = new();
 
+        public static MainWindow? MW { get; set; }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             Utils.Log("Application start");

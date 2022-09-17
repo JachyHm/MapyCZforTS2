@@ -135,11 +135,27 @@
   <data name="ContentSetProxy" xml:space="preserve">
     <value>Oops, během nastavování proxy se něco nepovedlo.\nNastavte prosím ručně následující hodnoty:\Adresa: localhost\nPort: {0}\nVýjimky:\nNepoužívat pro místní adresy: uncheck!</value>
   </data>
+  <data name="FromLeft" xml:space="preserve">
+    <value>zleva</value>
+  </data>
+  <data name="FromRight" xml:space="preserve">
+    <value>zprava</value>
+  </data>
+  <data name="LabelClearCache" xml:space="preserve">
+    <value>Vyčistit lokální cache</value>
+  </data>
+  <data name="LabelOpenLog" xml:space="preserve">
+    <value>Otevřit log</value>
+  </data>
   <data name="LabelPort" xml:space="preserve">
     <value>Port:</value>
   </data>
   <data name="LabelSelectMapset" xml:space="preserve">
     <value>Výběr mapových podkladů:</value>
+  </data>
+  <data name="MaxZoom" xml:space="preserve">
+    <value>Maximální zoom: {0}
+({1}. pozice posuvníku {2})</value>
   </data>
   <data name="MenuAbout" xml:space="preserve">
     <value>O aplikaci</value>

@@ -135,11 +135,27 @@
   <data name="ContentSetProxy" xml:space="preserve">
     <value>Oops, something went wrong while setting proxy settings.\nPlease manually set these values:\nAddress: localhost\nPort: {0}\nExcluded adresses:\nExlude localhost: uncheck!</value>
   </data>
+  <data name="FromLeft" xml:space="preserve">
+    <value>from left</value>
+  </data>
+  <data name="FromRight" xml:space="preserve">
+    <value>from right</value>
+  </data>
+  <data name="LabelClearCache" xml:space="preserve">
+    <value>Clear local images cache</value>
+  </data>
+  <data name="LabelOpenLog" xml:space="preserve">
+    <value>Open log file</value>
+  </data>
   <data name="LabelPort" xml:space="preserve">
     <value>Port:</value>
   </data>
   <data name="LabelSelectMapset" xml:space="preserve">
     <value>Mapsets selection:</value>
+  </data>
+  <data name="MaxZoom" xml:space="preserve">
+    <value>Max available zoom: {0}
+({1}. slider position {2})</value>
   </data>
   <data name="MenuAbout" xml:space="preserve">
     <value>About</value>

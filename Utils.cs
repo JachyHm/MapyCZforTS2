@@ -16,6 +16,7 @@ namespace MapyCZforTS_CS
         public enum LOG_LEVEL
         {
             ERROR,
+            INFO,
             VERBOSE
         }
 
@@ -23,8 +24,8 @@ namespace MapyCZforTS_CS
         /// Logs message.
         /// </summary>
         /// <param name="message">Message to log.</param>
-        /// <param name="level">Message level (0 - ERROR, 1 - VERBOSE)</param>
-        public static void Log(string message, LOG_LEVEL level = LOG_LEVEL.ERROR)
+        /// <param name="level">Message level (0 - ERROR, 1 - INFO, 2 - VERBOSE)</param>
+        public static void Log(string message, LOG_LEVEL level = LOG_LEVEL.INFO)
         {
             if (level > LogLevel)
                 return;
@@ -33,16 +34,20 @@ namespace MapyCZforTS_CS
             {
                 DateTime dateTime = DateTime.Now;
                 if (LogFile == null)
-                    LogFile = new(Path.Join(Path.GetTempPath(), $"MapyCZforTS_{dateTime:yyyyMMdd_HHmmss}.log"), false);
+                {
+                    LogPath = Path.Join(Path.GetTempPath(), $"MapyCZforTS_{dateTime:yyyyMMdd_HHmmss}.log");
+                    LogFile = new(LogPath, false);
+                }
 
-                LogFile.WriteLine($"{dateTime:O}: {message}");
+                LogFile.WriteLine($"{dateTime:O} {level}: {message}");
                 LogFile.Flush();
             }
             catch { }
         }
 
-        private static LOG_LEVEL LogLevel { get => (Settings.Default.AdvancedLogging ? LOG_LEVEL.VERBOSE : LOG_LEVEL.ERROR); }
+        private static LOG_LEVEL LogLevel { get => Settings.Default.AdvancedLogging ? LOG_LEVEL.VERBOSE : LOG_LEVEL.INFO; }
 
+        public static string? LogPath { get; set; }
         private static StreamWriter? LogFile { get; set; }
 
         private const string CACHED_TILE_PATTERN = "*staticmap*";
@@ -118,7 +123,7 @@ namespace MapyCZforTS_CS
             }
             catch (Exception e)
             {
-                Utils.Log($"PROXY -> Failed to restore default proxy settings:{Environment.NewLine}{e}");
+                Utils.Log($"PROXY -> Failed to restore default proxy settings:{Environment.NewLine}{e}", LOG_LEVEL.ERROR);
                 string host = string.Empty, port = string.Empty;
                 if (OldProxyHost != null)
                 {
@@ -180,7 +185,7 @@ namespace MapyCZforTS_CS
                     }
                     catch (Exception e)
                     {
-                        Log($"PROXY -> Failed to set registry values:{Environment.NewLine}{e}");
+                        Log($"PROXY -> Failed to set registry values:{Environment.NewLine}{e}", LOG_LEVEL.ERROR);
                         MessageBox.Show(string.Format(Strings.ContentSetProxy, Settings.Default.Port), Strings.TitleSetProxy, MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
 
@@ -211,7 +216,7 @@ namespace MapyCZforTS_CS
             }
             catch (Exception e)
             {
-                Utils.Log($"PROXY -> Failed to set custom proxy settings:{Environment.NewLine}{e}");
+                Utils.Log($"PROXY -> Failed to set custom proxy settings:{Environment.NewLine}{e}", LOG_LEVEL.ERROR);
             }
 
             RefreshProxy();
@@ -226,7 +231,7 @@ namespace MapyCZforTS_CS
                 InternetSetOption(IntPtr.Zero, 39, IntPtr.Zero, 0);
                 InternetSetOption(IntPtr.Zero, 37, IntPtr.Zero, 0);
             }
-            catch (Exception e) { Utils.Log($"PROXY -> Failed to apply networking changes:{Environment.NewLine}{e}"); }
+            catch (Exception e) { Utils.Log($"PROXY -> Failed to apply networking changes:{Environment.NewLine}{e}", LOG_LEVEL.ERROR); }
         }
 
         [DllImport("wininet.dll")]

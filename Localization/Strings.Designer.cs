@@ -115,6 +115,42 @@ namespace MapyCZforTS_CS.Localization {
         }
         
         /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný from left.
+        /// </summary>
+        public static string FromLeft {
+            get {
+                return ResourceManager.GetString("FromLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný from right.
+        /// </summary>
+        public static string FromRight {
+            get {
+                return ResourceManager.GetString("FromRight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Clear local images cache.
+        /// </summary>
+        public static string LabelClearCache {
+            get {
+                return ResourceManager.GetString("LabelClearCache", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Open log file.
+        /// </summary>
+        public static string LabelOpenLog {
+            get {
+                return ResourceManager.GetString("LabelOpenLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Vyhledá lokalizovaný řetězec podobný Port:.
         /// </summary>
         public static string LabelPort {
@@ -129,6 +165,16 @@ namespace MapyCZforTS_CS.Localization {
         public static string LabelSelectMapset {
             get {
                 return ResourceManager.GetString("LabelSelectMapset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledá lokalizovaný řetězec podobný Max available zoom: {0}
+        ///({1}. slider position {2}).
+        /// </summary>
+        public static string MaxZoom {
+            get {
+                return ResourceManager.GetString("MaxZoom", resourceCulture);
             }
         }
         

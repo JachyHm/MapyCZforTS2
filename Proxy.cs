@@ -61,7 +61,7 @@ namespace MapyCZforTS_CS
             {
                 ProxyServer.Start();
             }
-            catch (Exception e) { Utils.Log($"PROXY -> Failed to start proxy on port {Port}:{Environment.NewLine}{e}"); }
+            catch (Exception e) { Utils.Log($"PROXY -> Failed to start proxy on port {Port}:{Environment.NewLine}{e}", Utils.LOG_LEVEL.ERROR); }
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace MapyCZforTS_CS
             {
                 ProxyServer.Stop();
             }
-            catch (Exception e) { Utils.Log($"PROXY -> Failed to stop proxy on port {Port}:{Environment.NewLine}{e}"); }
+            catch (Exception e) { Utils.Log($"PROXY -> Failed to stop proxy on port {Port}:{Environment.NewLine}{e}", Utils.LOG_LEVEL.ERROR); }
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace MapyCZforTS_CS
                 ExplicitProxyEndPoint newEndpoint = new(IPAddress.Any, newPort, false);
                 ProxyServer.AddEndPoint(newEndpoint);
             }
-            catch (Exception e) { Utils.Log($"PROXY -> Failed to change proxy port to {newPort}:{Environment.NewLine}{e}"); }
+            catch (Exception e) { Utils.Log($"PROXY -> Failed to change proxy port to {newPort}:{Environment.NewLine}{e}", Utils.LOG_LEVEL.ERROR); }
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace MapyCZforTS_CS
             }
             catch (Exception ex)
             {
-                Utils.Log($"PROXY -> Failed to parse query {query}:{Environment.NewLine}{ex}");
+                Utils.Log($"PROXY -> Failed to parse query {query}:{Environment.NewLine}{ex}", Utils.LOG_LEVEL.ERROR);
                 throw;
             }
         }

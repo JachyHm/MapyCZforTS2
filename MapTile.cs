@@ -6,6 +6,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace MapyCZforTS_CS
 {
@@ -315,7 +316,8 @@ namespace MapyCZforTS_CS
             {
                 Settings.Default.Cache = false;
                 Settings.Default.Save();
-                Utils.Log($"FETCH -> Failed to create cache directory:{Environment.NewLine}{e}");
+                App.MW?.Dispatcher.Invoke(() => App.MW.cachingCheckbox.IsChecked = false);
+                Utils.Log($"FETCH -> Failed to create cache directory - disabling caching:{Environment.NewLine}{e}", Utils.LOG_LEVEL.ERROR);
             }
 
             Parallel.For(SourceTiles.xTiles.CenterTile - SourceTiles.xTiles.nTilesBefore, SourceTiles.xTiles.CenterTile + SourceTiles.xTiles.nTilesAfter + 1, (x) =>
@@ -341,7 +343,7 @@ namespace MapyCZforTS_CS
                                 await DownloadImage(fname, fpath, lx, ly);
                             }
                         }
-                        catch (Exception e) { Utils.Log($"FETCH -> Failed to fetch source tile {Mapset.Value}_{fname}: {e}"); }
+                        catch (Exception e) { Utils.Log($"FETCH -> Failed to fetch source tile {Mapset.Value}_{fname}: {e}", Utils.LOG_LEVEL.ERROR); }
 
                         lock (tilesLoadedEvent)
                         {

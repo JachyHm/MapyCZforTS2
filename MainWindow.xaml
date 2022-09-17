@@ -73,12 +73,11 @@
                 <Label>
                     <Label.Content>
                         <TextBlock>
-                            <Run Text="Maximální zoom:" />
-                            <Run x:Name="MaxZoomText" Text="5" />
+                            <Run x:Name="MaxZoomText" Text="" />
                         </TextBlock>
                     </Label.Content>
                 </Label>
-                <Button x:Name="toogleProxy" Content="{x:Static loc:Strings.ButtonEnableProxy}" Margin="0,10" Padding="50,20" Click="toogleProxy_Click" />
+                <Button x:Name="toogleProxy" Content="{x:Static loc:Strings.ButtonEnableProxy}" Margin="0,10" Padding="10,20" Click="toogleProxy_Click" />
             </StackPanel>
         </TabItem>
         <TabItem Header="{x:Static loc:Strings.MenuSettings}">
@@ -88,7 +87,9 @@
                 </StackPanel.LayoutTransform>
                 <Label Content="{x:Static loc:Strings.LabelPort}" />
                 <Slider x:Name="portInput" AllowDrop="False" Minimum="80" Maximum="65535" Value="5001" ValueChanged="portInput_ValueChanged" />
-                <CheckBox x:Name="loggingCheckbox" Content="{x:Static loc:Strings.CheckboxAdvancedLogging}" HorizontalAlignment="Left" Margin="0,10" Checked="loggingCheckbox_Checked" Unchecked="loggingCheckbox_Checked" />
+                <Button x:Name="clearCache" Content="{x:Static loc:Strings.LabelClearCache}" Margin="0,10,0,5" Padding="10,10" Click="clearCache_Click" />
+                <Button x:Name="openLog" Content="{x:Static loc:Strings.LabelOpenLog}" Margin="0,5" Padding="10,10" Click="openLog_Click" />
+                <CheckBox x:Name="loggingCheckbox" Content="{x:Static loc:Strings.CheckboxAdvancedLogging}" HorizontalAlignment="Left" Margin="0,5,0,10" Checked="loggingCheckbox_Checked" Unchecked="loggingCheckbox_Checked" />
                 <CheckBox x:Name="cachingCheckbox" Content="{x:Static loc:Strings.CheckboxCaching}" HorizontalAlignment="Left" Margin="0" Grid.Row="1" Checked="cachingCheckbox_Checked" Unchecked="cachingCheckbox_Checked" />
             </StackPanel>
         </TabItem>
