@@ -9,7 +9,7 @@ Z toho důvodu není při používání této aplikace potřeba žádný API kl�
 Všechny požadavky na Google API jsou zachyceny ještě na lokálním zařízení a jsou nahrazeny mapovými podklady Seznam/Bing.<br>
 
 ### Instalace:
-[Aplikaci stačí stáhnout](http://github.com/JachyHm/MapyCZforTS2/releases/latest/download/MapyCZforTS2.exe) do libovolného umístění a spustit.
+[Aplikaci stačí stáhnout](https://github.com/JachyHm/MapyCZforTS2/releases/latest/download/MapyCZforTS2.exe) do libovolného umístění a spustit.
 
 ### Použití:
 ![Hlavní obrazovka](https://user-images.githubusercontent.com/26261651/190869380-4924f11b-581a-4509-b211-c51d77bdd57d.png)
@@ -45,7 +45,7 @@ Because of that, having a valid Google API key is no longer required while using
 Every request for a Google Map tile is intercepted while still on the local machine and replaced with Seznam/Bing imagery.<br>
 
 ### Instalation:
-[Download the app from here](http://github.com/JachyHm/MapyCZforTS2/releases/latest/download/MapyCZforTS2.exe), place it anywhere you want and run it.
+[Download the app from here](https://github.com/JachyHm/MapyCZforTS2/releases/latest/download/MapyCZforTS2.exe), place it anywhere you want and run it.
 
 ### Usage:
 ![Main screen](https://user-images.githubusercontent.com/26261651/190868375-5a697aeb-b5ff-4cf6-b674-4ed33a05e9e5.png)
