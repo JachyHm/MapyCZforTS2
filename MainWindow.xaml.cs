@@ -36,6 +36,9 @@ namespace MapyCZforTS_CS
             Settings.Default.Mapset = mapsetInput.SelectedIndex;
             Settings.Default.Save();
             Utils.Log($"UI -> Changed mapset to {App.Mapsets[Settings.Default.Mapset]}");
+
+            MaxZoomText.Text = App.Mapsets[Settings.Default.Mapset].MaxZoom.ToString();
+
             Utils.CleanIECache();
         }
 

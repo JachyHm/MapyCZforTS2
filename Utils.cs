@@ -1,4 +1,5 @@
-﻿using MapyCZforTS_CS.Properties;
+﻿using MapyCZforTS_CS.Localization;
+using MapyCZforTS_CS.Properties;
 using Microsoft.Win32;
 using System;
 using System.IO;
@@ -155,7 +156,7 @@ namespace MapyCZforTS_CS
 
         public static Proxy EnableProxy()
         {
-            Utils.Log("PROXY -> Applying custom proxy settings", LOG_LEVEL.VERBOSE);
+            Log("PROXY -> Applying custom proxy settings", LOG_LEVEL.VERBOSE);
             try
             {
                 var hreg = Registry.CurrentUser.CreateSubKey(Path.Join("Software", "Microsoft", "Windows", "CurrentVersion", "Internet Settings"), true);
@@ -179,8 +180,8 @@ namespace MapyCZforTS_CS
                     }
                     catch (Exception e)
                     {
-                        Utils.Log($"PROXY -> Failed to set registry values:{Environment.NewLine}{e}");
-                        MessageBox.Show(string.Format(Localization.Strings.ContentSetProxy, Settings.Default.Port), Localization.Strings.TitleSetProxy, MessageBoxButton.OK, MessageBoxImage.Warning);
+                        Log($"PROXY -> Failed to set registry values:{Environment.NewLine}{e}");
+                        MessageBox.Show(string.Format(Strings.ContentSetProxy, Settings.Default.Port), Strings.TitleSetProxy, MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
 
                     if (OldProxyHost != null && OldProxyEnabled == 1)
