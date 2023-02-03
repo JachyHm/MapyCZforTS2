@@ -6,12 +6,13 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <StartupObject>MapyCZforTS_CS.App</StartupObject>
-    <AssemblyName>MapyCZforTS</AssemblyName>
+    <AssemblyName>MapyCZforTS2</AssemblyName>
     <NeutralLanguage>en</NeutralLanguage>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
     <PackageIcon>favicon.ico</PackageIcon>
     <PackageProjectUrl>rw.jachyhm.cz</PackageProjectUrl>
     <RepositoryUrl>https://github.com/JachyHm/MapyCZforTS</RepositoryUrl>
+    <Version>2.0.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

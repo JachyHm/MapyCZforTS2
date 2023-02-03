@@ -39,6 +39,8 @@ namespace MapyCZforTS_CS
             Mapsets.Add(new(Localization.Strings.MapTypeHist, "army2-m", 15));
             Mapsets.Add(new(Localization.Strings.MapTypeRelief, "relief-m", 15));
 
+            DownloadClient.DefaultRequestHeaders.Add("Referer", "https://mapy.cz/");
+
             if (Settings.Default.UpgradeRequired)
             {
                 Settings.Default.Upgrade();
